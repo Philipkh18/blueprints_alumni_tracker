@@ -1,0 +1,262 @@
+import { Client } from '@notionhq/client'
+import type { PageObjectResponse } from '@notionhq/client/build/src/api-endpoints'
+import type { Profile, Internship, Club } from './types'
+
+export const notion = new Client({ auth: process.env.NOTION_TOKEN })
+
+const PROFILES_DB = process.env.NOTION_PROFILES_DB_ID!
+const INTERNSHIPS_DB = process.env.NOTION_INTERNSHIPS_DB_ID!
+const CLUBS_DB = process.env.NOTION_CLUBS_DB_ID!
+
+// ─── Property helpers ────────────────────────────────────────────────────────
+
+function getText(page: PageObjectResponse, prop: string): string {
+  const p = page.properties[prop]
+  if (!p) return ''
+  if (p.type === 'title') return p.title[0]?.plain_text ?? ''
+  if (p.type === 'rich_text') return p.rich_text[0]?.plain_text ?? ''
+  return ''
+}
+
+function getNumber(page: PageObjectResponse, prop: string): number | null {
+  const p = page.properties[prop]
+  return p?.type === 'number' ? p.number : null
+}
+
+function getBool(page: PageObjectResponse, prop: string): boolean {
+  const p = page.properties[prop]
+  return p?.type === 'checkbox' ? p.checkbox : false
+}
+
+function getUrl(page: PageObjectResponse, prop: string): string | null {
+  const p = page.properties[prop]
+  return p?.type === 'url' ? p.url : null
+}
+
+function getDate(page: PageObjectResponse, prop: string): string | null {
+  const p = page.properties[prop]
+  return p?.type === 'date' ? (p.date?.start ?? null) : null
+}
+
+function getRelationId(page: PageObjectResponse, prop: string): string | null {
+  const p = page.properties[prop]
+  return p?.type === 'relation' ? (p.relation[0]?.id ?? null) : null
+}
+
+// ─── Page → Type converters ──────────────────────────────────────────────────
+
+export function pageToProfile(page: PageObjectResponse): Profile {
+  return {
+    id: page.id,
+    clerk_id: getText(page, 'clerk_id'),
+    full_name: getText(page, 'Name'),
+    graduation_year: getNumber(page, 'graduation_year'),
+    major: getText(page, 'major') || null,
+    minor: getText(page, 'minor') || null,
+    bio: getText(page, 'bio') || null,
+    linkedin_url: getUrl(page, 'linkedin_url'),
+    avatar_url: getUrl(page, 'avatar_url'),
+    is_admin: getBool(page, 'is_admin'),
+    created_at: page.created_time,
+  }
+}
+
+export function pageToInternship(page: PageObjectResponse): Internship {
+  return {
+    id: page.id,
+    profile_id: getRelationId(page, 'Profile') ?? '',
+    company: getText(page, 'company'),
+    role: getText(page, 'Name'),
+    start_date: getDate(page, 'start_date') ?? '',
+    end_date: getDate(page, 'end_date'),
+    description: getText(page, 'description') || null,
+  }
+}
+
+export function pageToClub(page: PageObjectResponse): Club {
+  return {
+    id: page.id,
+    profile_id: getRelationId(page, 'Profile') ?? '',
+    club_name: getText(page, 'Name'),
+    role: getText(page, 'role') || null,
+    start_year: getNumber(page, 'start_year'),
+    end_year: getNumber(page, 'end_year'),
+  }
+}
+
+// ─── Query helpers ───────────────────────────────────────────────────────────
+
+export async function getProfileByClerkId(clerkId: string): Promise<Profile | null> {
+  const res = await notion.databases.query({
+    database_id: PROFILES_DB,
+    filter: { property: 'clerk_id', rich_text: { equals: clerkId } },
+  })
+  const page = res.results[0]
+  return page ? pageToProfile(page as PageObjectResponse) : null
+}
+
+export async function getProfileById(id: string): Promise<Profile | null> {
+  try {
+    const page = await notion.pages.retrieve({ page_id: id })
+    return pageToProfile(page as PageObjectResponse)
+  } catch {
+    return null
+  }
+}
+
+export async function getAllProfiles(filters?: {
+  q?: string
+  year?: number
+  major?: string
+}): Promise<Profile[]> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const conditions: any[] = []
+
+  if (filters?.q) {
+    conditions.push({ property: 'Name', title: { contains: filters.q } })
+  }
+  if (filters?.year) {
+    conditions.push({ property: 'graduation_year', number: { equals: filters.year } })
+  }
+  if (filters?.major) {
+    conditions.push({ property: 'major', rich_text: { contains: filters.major } })
+  }
+
+  const res = await notion.databases.query({
+    database_id: PROFILES_DB,
+    filter:
+      conditions.length > 1
+        ? { and: conditions }
+        : conditions.length === 1
+          ? conditions[0]
+          : undefined,
+    sorts: [{ property: 'Name', direction: 'ascending' }],
+  })
+
+  return res.results.map((p) => pageToProfile(p as PageObjectResponse))
+}
+
+export async function getInternshipsByProfileId(profileId: string): Promise<Internship[]> {
+  const res = await notion.databases.query({
+    database_id: INTERNSHIPS_DB,
+    filter: { property: 'Profile', relation: { contains: profileId } },
+  })
+  return res.results.map((p) => pageToInternship(p as PageObjectResponse))
+}
+
+export async function getClubsByProfileId(profileId: string): Promise<Club[]> {
+  const res = await notion.databases.query({
+    database_id: CLUBS_DB,
+    filter: { property: 'Profile', relation: { contains: profileId } },
+  })
+  return res.results.map((p) => pageToClub(p as PageObjectResponse))
+}
+
+// ─── Mutation helpers ────────────────────────────────────────────────────────
+
+export async function createProfile(clerkId: string, fullName: string): Promise<void> {
+  await notion.pages.create({
+    parent: { database_id: PROFILES_DB },
+    properties: {
+      Name: { title: [{ text: { content: fullName } }] },
+      clerk_id: { rich_text: [{ text: { content: clerkId } }] },
+      is_admin: { checkbox: false },
+    },
+  })
+}
+
+export async function updateProfile(
+  profileId: string,
+  data: {
+    full_name: string
+    graduation_year: number | null
+    major: string | null
+    minor: string | null
+    bio: string | null
+    linkedin_url: string | null
+  }
+): Promise<void> {
+  await notion.pages.update({
+    page_id: profileId,
+    properties: {
+      Name: { title: [{ text: { content: data.full_name } }] },
+      graduation_year: { number: data.graduation_year },
+      major: { rich_text: [{ text: { content: data.major ?? '' } }] },
+      minor: { rich_text: [{ text: { content: data.minor ?? '' } }] },
+      bio: { rich_text: [{ text: { content: data.bio ?? '' } }] },
+      linkedin_url: { url: data.linkedin_url },
+    },
+  })
+}
+
+export async function syncInternships(
+  profileId: string,
+  internships: Array<{
+    company: string
+    role: string
+    start_date: string
+    end_date: string | null
+    description: string | null
+  }>
+): Promise<void> {
+  const existing = await getInternshipsByProfileId(profileId)
+  await Promise.all(existing.map((i) => notion.pages.update({ page_id: i.id, archived: true })))
+  await Promise.all(
+    internships
+      .filter((i) => i.company && i.role && i.start_date)
+      .map((i) =>
+        notion.pages.create({
+          parent: { database_id: INTERNSHIPS_DB },
+          properties: {
+            Name: { title: [{ text: { content: i.role } }] },
+            company: { rich_text: [{ text: { content: i.company } }] },
+            Profile: { relation: [{ id: profileId }] },
+            start_date: { date: { start: i.start_date } },
+            end_date: i.end_date ? { date: { start: i.end_date } } : { date: null },
+            description: { rich_text: [{ text: { content: i.description ?? '' } }] },
+          },
+        })
+      )
+  )
+}
+
+export async function syncClubs(
+  profileId: string,
+  clubs: Array<{
+    club_name: string
+    role: string | null
+    start_year: number | null
+    end_year: number | null
+  }>
+): Promise<void> {
+  const existing = await getClubsByProfileId(profileId)
+  await Promise.all(existing.map((c) => notion.pages.update({ page_id: c.id, archived: true })))
+  await Promise.all(
+    clubs
+      .filter((c) => c.club_name)
+      .map((c) =>
+        notion.pages.create({
+          parent: { database_id: CLUBS_DB },
+          properties: {
+            Name: { title: [{ text: { content: c.club_name } }] },
+            role: { rich_text: [{ text: { content: c.role ?? '' } }] },
+            Profile: { relation: [{ id: profileId }] },
+            start_year: { number: c.start_year },
+            end_year: { number: c.end_year },
+          },
+        })
+      )
+  )
+}
+
+export async function deleteProfileAndRelated(profileId: string): Promise<void> {
+  const [internships, clubs] = await Promise.all([
+    getInternshipsByProfileId(profileId),
+    getClubsByProfileId(profileId),
+  ])
+  await Promise.all([
+    ...internships.map((i) => notion.pages.update({ page_id: i.id, archived: true })),
+    ...clubs.map((c) => notion.pages.update({ page_id: c.id, archived: true })),
+  ])
+  await notion.pages.update({ page_id: profileId, archived: true })
+}
