@@ -1,35 +1,38 @@
-import { Suspense } from 'react'
-import Image from 'next/image'
-import Link from 'next/link'
-import AnnouncementsSection from '@/components/home/AnnouncementsSection'
-import EventsSection from '@/components/home/EventsSection'
-import QuickLinksSection from '@/components/home/QuickLinksSection'
-import IdeaBoardSection from '@/components/home/IdeaBoardSection'
-import OrgNeedsSection from '@/components/home/OrgNeedsSection'
-import { SectionSkeleton, QuickLinksSkeleton } from '@/components/home/HomeSkeleton'
-import { Badge } from '@/components/ui/badge'
-import { buttonVariants } from '@/components/ui/button-variants'
-import { Globe, Lightbulb, Network } from 'lucide-react'
+import { Suspense } from "react";
+import Image from "next/image";
+import Link from "next/link";
+import AnnouncementsSection from "@/components/home/AnnouncementsSection";
+import EventsSection from "@/components/home/EventsSection";
+import QuickLinksSection from "@/components/home/QuickLinksSection";
+import IdeaBoardSection from "@/components/home/IdeaBoardSection";
+import OrgNeedsSection from "@/components/home/OrgNeedsSection";
+import {
+  SectionSkeleton,
+  QuickLinksSkeleton,
+} from "@/components/home/HomeSkeleton";
+import { Badge } from "@/components/ui/badge";
+import { buttonVariants } from "@/components/ui/button-variants";
+import { Globe, Lightbulb, Network } from "lucide-react";
 
-export const metadata = { title: 'Home — Blueprints for Pangaea' }
+export const metadata = { title: "Home — Blueprints for Pangaea" };
 
 const HERO_PILLARS = [
   {
     icon: Globe,
-    title: 'Shared visibility',
-    copy: 'Profiles, roles, and alumni context stay easy to discover.',
+    title: "Shared visibility",
+    copy: "Profiles, roles, and alumni context stay easy to discover.",
   },
   {
     icon: Network,
-    title: 'Network coordination',
-    copy: 'Announcements, events, and org needs stay in one operating layer.',
+    title: "Network coordination",
+    copy: "Announcements, events, and org needs stay in one operating layer.",
   },
   {
     icon: Lightbulb,
-    title: 'Momentum',
-    copy: 'Ideas and opportunities stay attached to the Blueprints identity.',
+    title: "Momentum",
+    copy: "Ideas and opportunities stay attached to the Blueprints identity.",
   },
-]
+];
 
 export default function HomePage() {
   return (
@@ -48,21 +51,24 @@ export default function HomePage() {
 
             <div className="space-y-4">
               <h1 className="max-w-4xl text-5xl font-semibold tracking-[-0.04em] text-balance text-foreground sm:text-6xl lg:text-7xl">
-                A cleaner home for the Blueprints network.
+                Blueprints for Pangaea Database.
               </h1>
               <p className="max-w-2xl text-lg leading-relaxed tracking-[-0.01em] text-muted-foreground sm:text-xl">
-                Profiles, updates, events, and team needs in one calm interface with a more
-                restrained, Apple-like visual system.
+                Profiles, updates, events, and team needs in one calm interface
+                with a more restrained, Apple-like visual system.
               </p>
             </div>
 
             <div className="flex flex-wrap gap-3">
-              <Link href="/dashboard" className={buttonVariants({ size: 'lg' })}>
+              <Link
+                href="/dashboard"
+                className={buttonVariants({ size: "lg" })}
+              >
                 Browse Members
               </Link>
               <Link
                 href="/profile/edit"
-                className={buttonVariants({ variant: 'outline', size: 'lg' })}
+                className={buttonVariants({ variant: "outline", size: "lg" })}
               >
                 Update Your Profile
               </Link>
@@ -77,8 +83,12 @@ export default function HomePage() {
                   <div className="mb-3 flex size-11 items-center justify-center rounded-full bg-primary/10 text-primary">
                     <Icon className="size-4" />
                   </div>
-                  <p className="text-[15px] font-semibold tracking-[-0.02em] text-foreground">{title}</p>
-                  <p className="mt-1 text-sm leading-relaxed text-muted-foreground">{copy}</p>
+                  <p className="text-[15px] font-semibold tracking-[-0.02em] text-foreground">
+                    {title}
+                  </p>
+                  <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
+                    {copy}
+                  </p>
                 </div>
               ))}
             </div>
@@ -97,14 +107,16 @@ export default function HomePage() {
                   className="h-auto w-full max-w-[16rem]"
                 />
                 <div className="flex flex-wrap justify-center gap-2">
-                  {['Directory', 'Events', 'Org Needs', 'Ideas'].map((label) => (
-                    <span
-                      key={label}
-                      className="brand-chip rounded-full px-3 py-1.5 text-xs font-medium text-foreground"
-                    >
-                      {label}
-                    </span>
-                  ))}
+                  {["Directory", "Events", "Org Needs", "Ideas"].map(
+                    (label) => (
+                      <span
+                        key={label}
+                        className="brand-chip rounded-full px-3 py-1.5 text-xs font-medium text-foreground"
+                      >
+                        {label}
+                      </span>
+                    ),
+                  )}
                 </div>
               </div>
             </div>
@@ -113,7 +125,10 @@ export default function HomePage() {
       </section>
 
       {/* Row 1: Announcements (2/3) + Events (1/3) */}
-      <div id="updates" className="grid grid-cols-1 gap-6 animate-fade-up stagger-1 lg:grid-cols-3">
+      <div
+        id="updates"
+        className="grid grid-cols-1 gap-6 animate-fade-up stagger-1 lg:grid-cols-3"
+      >
         <div className="lg:col-span-2">
           <Suspense fallback={<SectionSkeleton rows={3} />}>
             <AnnouncementsSection />
@@ -143,5 +158,5 @@ export default function HomePage() {
         </Suspense>
       </div>
     </div>
-  )
+  );
 }

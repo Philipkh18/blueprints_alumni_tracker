@@ -1,7 +1,7 @@
 'use client'
 
 import { useRouter, useSearchParams } from 'next/navigation'
-import { useCallback } from 'react'
+import { useCallback, useState, useEffect, useRef } from 'react'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Search, X } from 'lucide-react'
@@ -19,7 +19,10 @@ export default function MemberFilters({ years, majors, teams }: Props) {
   const router = useRouter()
   const searchParams = useSearchParams()
 
-  const q = searchParams.get('q') ?? ''
+  const qParam = searchParams.get('q') ?? ''
+  const [q, setQ] = useState(qParam)
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
   const year = searchParams.get('year') ?? ''
   const major = searchParams.get('major') ?? ''
   const status = searchParams.get('status') ?? ''
@@ -38,6 +41,22 @@ export default function MemberFilters({ years, majors, teams }: Props) {
     [router, searchParams]
   )
 
+  // Sync local state when URL changes externally (e.g. Clear button)
+  useEffect(() => {
+    setQ(qParam)
+  }, [qParam])
+
+  const updateSearch = useCallback(
+    (value: string) => {
+      setQ(value)
+      if (debounceRef.current) clearTimeout(debounceRef.current)
+      debounceRef.current = setTimeout(() => {
+        updateParam('q', value)
+      }, 300)
+    },
+    [updateParam]
+  )
+
   const hasFilters = q || year || major || status || team
 
   return (
@@ -49,7 +68,7 @@ export default function MemberFilters({ years, majors, teams }: Props) {
           <Input
             placeholder="Search by name..."
             value={q}
-            onChange={(e) => updateParam('q', e.target.value)}
+            onChange={(e) => updateSearch(e.target.value)}
             className="pl-8 h-8 bg-white/60 border-[oklch(0.8_0.05_252/0.45)]"
           />
         </div>
