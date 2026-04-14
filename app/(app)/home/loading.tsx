@@ -3,9 +3,9 @@ import { SectionSkeleton, QuickLinksSkeleton } from '@/components/home/HomeSkele
 export default function HomeLoading() {
   return (
     <div className="space-y-8">
-      <div className="space-y-1">
-        <div className="h-7 w-16 rounded-md bg-muted animate-pulse" />
-        <div className="h-4 w-56 rounded bg-muted animate-pulse" />
+      <div className="space-y-2">
+        <div className="h-7 w-16 rounded-lg skeleton-shimmer" />
+        <div className="h-4 w-72 rounded-lg skeleton-shimmer" />
       </div>
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2">

@@ -1,11 +1,11 @@
 import { getUpcomingEvents } from '@/lib/notion-home'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import type { HomeEvent } from '@/lib/types'
-import { MapPin } from 'lucide-react'
+import { Calendar, MapPin } from 'lucide-react'
+import { cn } from '@/lib/utils'
 
 function formatEventDate(dateStr: string): { month: string; day: string; weekday: string } {
-  // Append T00:00:00 to treat as local date, not UTC
   const d = new Date(dateStr + 'T00:00:00')
   return {
     month: d.toLocaleDateString('en-US', { month: 'short' }),
@@ -15,13 +15,11 @@ function formatEventDate(dateStr: string): { month: string; day: string; weekday
 }
 
 function isToday(dateStr: string): boolean {
-  const today = new Date().toISOString().split('T')[0]
-  return dateStr === today
+  return dateStr === new Date().toISOString().split('T')[0]
 }
 
 function isTomorrow(dateStr: string): boolean {
-  const tomorrow = new Date(Date.now() + 86_400_000).toISOString().split('T')[0]
-  return dateStr === tomorrow
+  return dateStr === new Date(Date.now() + 86_400_000).toISOString().split('T')[0]
 }
 
 function dateLabel(dateStr: string): string | null {
@@ -36,23 +34,26 @@ function EventItem({ event }: { event: HomeEvent }) {
   const today = isToday(event.date)
 
   return (
-    <div className="flex gap-3 items-start">
+    <div className="group flex gap-3 items-start transition-colors duration-150 rounded-lg p-1.5 -mx-1.5 hover:bg-accent/40">
       <div
-        className={`flex w-12 shrink-0 flex-col items-center rounded-lg py-1.5 text-center ring-1 ${
-          today ? 'bg-primary text-primary-foreground ring-primary' : 'ring-border'
-        }`}
+        className={cn(
+          'flex w-12 shrink-0 flex-col items-center rounded-xl py-1.5 text-center ring-1 transition-shadow duration-200',
+          today
+            ? 'bg-primary text-primary-foreground ring-primary shadow-[0_2px_8px_oklch(0.44_0.19_260/0.25)]'
+            : 'ring-border group-hover:ring-border/80'
+        )}
       >
-        <span className={`text-[10px] uppercase tracking-wide ${today ? 'opacity-80' : 'text-muted-foreground'}`}>
+        <span className={cn('text-[10px] uppercase tracking-wide', today ? 'opacity-80' : 'text-muted-foreground')}>
           {month}
         </span>
         <span className="text-lg font-bold leading-none">{day}</span>
-        <span className={`text-[10px] ${today ? 'opacity-80' : 'text-muted-foreground'}`}>
+        <span className={cn('text-[10px]', today ? 'opacity-80' : 'text-muted-foreground')}>
           {weekday}
         </span>
       </div>
-      <div className="min-w-0 flex-1 py-0.5 space-y-0.5">
+      <div className="min-w-0 flex-1 py-0.5 space-y-1">
         <div className="flex items-center gap-1.5 flex-wrap">
-          <p className="text-sm font-medium leading-snug">{event.title}</p>
+          <p className="text-sm font-semibold leading-snug">{event.title}</p>
           {label && (
             <Badge variant={today ? 'default' : 'secondary'} className="text-[10px]">
               {label}
@@ -86,21 +87,27 @@ export default async function EventsSection() {
   }
 
   return (
-    <Card className="h-full">
+    <Card className="h-full shadow-sm">
       <CardHeader className="border-b">
-        <CardTitle>Upcoming Events</CardTitle>
+        <CardTitle className="flex items-center gap-2">
+          <Calendar className="size-4 text-primary" />
+          Upcoming Events
+        </CardTitle>
+        <CardDescription>What&apos;s on the calendar</CardDescription>
       </CardHeader>
       <CardContent className="pt-3">
         {error ? (
-          <p className="text-sm text-muted-foreground py-6 text-center">
-            Could not load events. Try refreshing.
-          </p>
+          <div className="py-8 text-center">
+            <p className="text-sm text-muted-foreground">Could not load events.</p>
+            <p className="text-xs text-muted-foreground/60 mt-1">Try refreshing the page.</p>
+          </div>
         ) : events.length === 0 ? (
-          <p className="text-sm text-muted-foreground py-6 text-center">
-            No upcoming events scheduled.
-          </p>
+          <div className="py-8 text-center">
+            <Calendar className="mx-auto size-8 text-muted-foreground/30 mb-2" />
+            <p className="text-sm text-muted-foreground">No upcoming events scheduled.</p>
+          </div>
         ) : (
-          <div className="space-y-4">
+          <div className="space-y-2">
             {events.map((event) => (
               <EventItem key={event.id} event={event} />
             ))}
