@@ -3,10 +3,7 @@ import AuthFrame from '@/components/auth/AuthFrame'
 
 export default function LoginPage() {
   return (
-    <AuthFrame
-      title="Welcome back"
-      description="Sign in to reach the Blueprints for Pangaea alumni directory, updates, and opportunities."
-    >
+    <AuthFrame>
       <SignIn />
     </AuthFrame>
   )
