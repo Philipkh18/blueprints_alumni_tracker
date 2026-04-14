@@ -8,7 +8,7 @@ import IdeaBoardSection from '@/components/home/IdeaBoardSection'
 import OrgNeedsSection from '@/components/home/OrgNeedsSection'
 import { SectionSkeleton, QuickLinksSkeleton } from '@/components/home/HomeSkeleton'
 import { Badge } from '@/components/ui/badge'
-import { buttonVariants } from '@/components/ui/button'
+import { buttonVariants } from '@/components/ui/button-variants'
 import { Globe, Lightbulb, Network } from 'lucide-react'
 
 export const metadata = { title: 'Home — Blueprints for Pangaea' }
