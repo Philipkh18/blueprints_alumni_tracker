@@ -31,13 +31,12 @@ export default function AuthFrame({
 }) {
   return (
     <main className="min-h-screen overflow-hidden px-4 py-8 sm:px-6 lg:px-8">
-      <div className="mx-auto grid min-h-[calc(100vh-4rem)] max-w-6xl items-center gap-6 lg:grid-cols-[minmax(0,1.1fr)_420px]">
-        <section className="brand-panel brand-grid relative hidden overflow-hidden rounded-[2rem] p-8 lg:flex lg:flex-col lg:justify-between">
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,oklch(0.88_0.1_252/0.22),transparent_36%)]" />
-          <div className="brand-rings absolute inset-y-8 right-[-12%] aspect-square w-[32rem] opacity-80" />
+      <div className="mx-auto grid min-h-[calc(100vh-4rem)] max-w-6xl items-center gap-8 lg:grid-cols-[minmax(0,1.05fr)_420px]">
+        <section className="relative hidden overflow-hidden rounded-[2.5rem] px-8 py-10 lg:flex lg:flex-col lg:justify-between">
+          <div className="absolute inset-0 rounded-[2.5rem] bg-[radial-gradient(circle_at_top,oklch(0.985_0.012_245),transparent_62%)]" />
 
-          <div className="relative max-w-2xl space-y-6">
-            <div className="brand-chip inline-flex rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.32em] text-[var(--color-brand-deep)]">
+          <div className="relative max-w-2xl space-y-7">
+            <div className="brand-chip inline-flex rounded-full px-4 py-1.5 text-[11px] font-medium tracking-[0.02em] text-foreground">
               Blueprints Network
             </div>
             <Image
@@ -46,39 +45,39 @@ export default function AuthFrame({
               width={936}
               height={556}
               priority
-              className="h-auto w-[18rem]"
+              className="h-auto w-[16rem]"
             />
             <div className="space-y-4">
-              <h1 className="max-w-xl text-4xl font-semibold leading-tight text-balance">
-                A shared alumni atlas for the people building across continents.
+              <h1 className="max-w-2xl text-5xl font-semibold leading-[0.98] tracking-[-0.045em] text-balance text-foreground">
+                Sign in to a quieter home for the Blueprints network.
               </h1>
-              <p className="max-w-lg text-base leading-relaxed text-muted-foreground">
-                Keep the directory, opportunities, updates, and team asks in one place that
-                actually looks like Blueprints for Pangaea.
+              <p className="max-w-xl text-lg leading-relaxed tracking-[-0.01em] text-muted-foreground">
+                Alumni context, live org requests, and shared opportunities in a cleaner interface
+                that keeps the focus on the people and the work.
               </p>
             </div>
           </div>
 
-          <div className="relative grid gap-3 sm:grid-cols-3">
+          <div className="relative grid gap-4 sm:grid-cols-3">
             {HIGHLIGHTS.map(({ icon: Icon, title, copy }) => (
               <div
                 key={title}
-                className="rounded-[1.5rem] border border-white/70 bg-white/75 p-4 shadow-[0_12px_32px_oklch(0.22_0.07_257/0.08)] backdrop-blur"
+                className="rounded-[1.75rem] border border-border bg-white/70 p-5 shadow-[0_16px_30px_oklch(0.23_0.015_255/0.06)] backdrop-blur"
               >
-                <div className="mb-3 flex size-10 items-center justify-center rounded-2xl bg-[linear-gradient(135deg,var(--color-brand-ocean),var(--color-brand-bright))] text-primary-foreground shadow-[0_12px_24px_oklch(0.5_0.18_257/0.22)]">
+                <div className="mb-3 flex size-11 items-center justify-center rounded-full bg-primary/10 text-primary">
                   <Icon className="size-4" />
                 </div>
-                <p className="text-sm font-semibold text-foreground">{title}</p>
-                <p className="mt-1 text-xs leading-relaxed text-muted-foreground">{copy}</p>
+                <p className="text-[15px] font-semibold tracking-[-0.02em] text-foreground">{title}</p>
+                <p className="mt-1 text-sm leading-relaxed text-muted-foreground">{copy}</p>
               </div>
             ))}
           </div>
         </section>
 
         <section className="relative flex justify-center">
-          <div className="brand-panel w-full max-w-md rounded-[2rem] p-6 sm:p-8">
+          <div className="brand-panel w-full max-w-md rounded-[2.25rem] p-7 sm:p-9">
             <div className="text-center">
-              <div className="brand-chip mx-auto inline-flex rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.32em] text-[var(--color-brand-deep)]">
+              <div className="brand-chip mx-auto inline-flex rounded-full px-4 py-1.5 text-[11px] font-medium tracking-[0.02em] text-foreground">
                 Alumni Hub
               </div>
               <Image
@@ -87,15 +86,17 @@ export default function AuthFrame({
                 width={936}
                 height={556}
                 priority
-                className="mx-auto mt-4 h-auto w-[13.5rem]"
+                className="mx-auto mt-5 h-auto w-[12.5rem]"
               />
-              <h2 className="mt-6 text-2xl font-semibold text-foreground">{title}</h2>
-              <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{description}</p>
+              <h2 className="mt-7 text-[2rem] font-semibold tracking-[-0.03em] text-foreground">
+                {title}
+              </h2>
+              <p className="mt-3 text-[15px] leading-relaxed text-muted-foreground">{description}</p>
             </div>
 
-            <div className="mt-6">{children}</div>
+            <div className="mt-7">{children}</div>
 
-            <p className="mt-6 text-center text-xs text-muted-foreground">
+            <p className="mt-7 text-center text-xs text-muted-foreground">
               Need public context first?{' '}
               <a
                 href="https://www.blueprintsforpangaea.org/"

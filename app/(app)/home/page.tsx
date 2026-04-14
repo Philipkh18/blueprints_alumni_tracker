@@ -33,28 +33,26 @@ const HERO_PILLARS = [
 
 export default function HomePage() {
   return (
-    <div className="space-y-8">
-      <section className="brand-panel brand-grid relative overflow-hidden rounded-[2rem] p-6 animate-fade-up sm:p-8">
-        <div className="absolute inset-y-0 right-0 hidden w-1/2 bg-[radial-gradient(circle_at_center,oklch(0.88_0.1_252/0.22),transparent_58%)] lg:block" />
-        <div className="absolute inset-y-6 right-[-8%] hidden aspect-square w-[26rem] brand-rings opacity-80 lg:block" />
+    <div className="space-y-10">
+      <section className="relative overflow-hidden rounded-[2.5rem] px-6 py-8 animate-fade-up sm:px-8 sm:py-10">
+        <div className="absolute inset-0 rounded-[2.5rem] bg-[radial-gradient(circle_at_top,oklch(0.985_0.012_245),transparent_60%)]" />
 
-        <div className="relative grid gap-8 lg:grid-cols-[minmax(0,1.15fr)_340px] lg:items-center">
-          <div className="space-y-6">
+        <div className="relative grid gap-10 lg:grid-cols-[minmax(0,1.1fr)_360px] lg:items-center">
+          <div className="space-y-7">
             <Badge
               variant="outline"
-              className="brand-chip w-fit rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.32em] text-[var(--color-brand-deep)]"
+              className="brand-chip w-fit rounded-full px-4 py-1.5 text-[11px] font-medium tracking-[0.02em] text-foreground"
             >
-              Global Alumni Atlas
+              Blueprints Alumni Hub
             </Badge>
 
             <div className="space-y-4">
-              <h1 className="max-w-3xl text-4xl font-semibold tracking-tight text-balance sm:text-5xl">
-                Make the <span className="text-brand-gradient">Blueprints</span> network feel
-                connected, visible, and unmistakably on-brand.
+              <h1 className="max-w-4xl text-5xl font-semibold tracking-[-0.04em] text-balance text-foreground sm:text-6xl lg:text-7xl">
+                A cleaner home for the Blueprints network.
               </h1>
-              <p className="max-w-2xl text-base leading-relaxed text-muted-foreground sm:text-lg">
-                This hub brings alumni profiles, org updates, events, and live needs into one
-                place with the same global energy as the Blueprints for Pangaea mark.
+              <p className="max-w-2xl text-lg leading-relaxed tracking-[-0.01em] text-muted-foreground sm:text-xl">
+                Profiles, updates, events, and team needs in one calm interface with a more
+                restrained, Apple-like visual system.
               </p>
             </div>
 
@@ -74,35 +72,35 @@ export default function HomePage() {
               {HERO_PILLARS.map(({ icon: Icon, title, copy }) => (
                 <div
                   key={title}
-                  className="rounded-[1.5rem] border border-white/70 bg-white/75 p-4 shadow-[0_12px_32px_oklch(0.22_0.07_257/0.08)] backdrop-blur"
+                  className="rounded-[1.75rem] border border-border bg-white/70 p-5 shadow-[0_16px_30px_oklch(0.23_0.015_255/0.06)] backdrop-blur"
                 >
-                  <div className="mb-3 flex size-10 items-center justify-center rounded-2xl bg-[linear-gradient(135deg,var(--color-brand-ocean),var(--color-brand-bright))] text-primary-foreground shadow-[0_12px_24px_oklch(0.5_0.18_257/0.22)]">
+                  <div className="mb-3 flex size-11 items-center justify-center rounded-full bg-primary/10 text-primary">
                     <Icon className="size-4" />
                   </div>
-                  <p className="text-sm font-semibold text-foreground">{title}</p>
-                  <p className="mt-1 text-xs leading-relaxed text-muted-foreground">{copy}</p>
+                  <p className="text-[15px] font-semibold tracking-[-0.02em] text-foreground">{title}</p>
+                  <p className="mt-1 text-sm leading-relaxed text-muted-foreground">{copy}</p>
                 </div>
               ))}
             </div>
           </div>
 
           <div className="relative flex items-center justify-center lg:justify-end">
-            <div className="brand-panel relative w-full max-w-sm overflow-hidden rounded-[2rem] p-6">
-              <div className="brand-grid absolute inset-0 opacity-35" />
-              <div className="relative flex flex-col items-center gap-5">
+            <div className="brand-panel relative w-full max-w-sm overflow-hidden rounded-[2.25rem] p-8">
+              <div className="absolute inset-x-0 top-0 h-32 bg-[radial-gradient(circle_at_top,oklch(0.98_0.015_245),transparent_72%)]" />
+              <div className="relative flex flex-col items-center gap-6">
                 <Image
                   src="/brand/blueprints-logo.png"
                   alt="Blueprints for Pangaea"
                   width={936}
                   height={556}
                   priority
-                  className="h-auto w-full max-w-[18rem]"
+                  className="h-auto w-full max-w-[16rem]"
                 />
                 <div className="flex flex-wrap justify-center gap-2">
                   {['Directory', 'Events', 'Org Needs', 'Ideas'].map((label) => (
                     <span
                       key={label}
-                      className="brand-chip rounded-full px-3 py-1 text-xs font-medium text-[var(--color-brand-deep)]"
+                      className="brand-chip rounded-full px-3 py-1.5 text-xs font-medium text-foreground"
                     >
                       {label}
                     </span>
@@ -115,7 +113,7 @@ export default function HomePage() {
       </section>
 
       {/* Row 1: Announcements (2/3) + Events (1/3) */}
-      <div id="updates" className="grid grid-cols-1 lg:grid-cols-3 gap-6 animate-fade-up stagger-1">
+      <div id="updates" className="grid grid-cols-1 gap-6 animate-fade-up stagger-1 lg:grid-cols-3">
         <div className="lg:col-span-2">
           <Suspense fallback={<SectionSkeleton rows={3} />}>
             <AnnouncementsSection />
@@ -136,7 +134,7 @@ export default function HomePage() {
       </div>
 
       {/* Row 3: Idea Board (1/2) + Org Needs (1/2) */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 animate-fade-up stagger-3">
+      <div className="grid grid-cols-1 gap-6 animate-fade-up stagger-3 lg:grid-cols-2">
         <Suspense fallback={<SectionSkeleton rows={3} />}>
           <IdeaBoardSection />
         </Suspense>

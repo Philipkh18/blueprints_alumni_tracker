@@ -110,51 +110,48 @@ export default function AppShell({
       {/* ── Sidebar ──────────────────────────────────────────────────────── */}
       <aside
         className={cn(
-          'fixed inset-y-0 left-0 z-50 flex flex-col overflow-hidden border-r border-sidebar-border bg-[linear-gradient(180deg,oklch(0.995_0.004_248)_0%,oklch(0.965_0.014_248)_100%)] transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] lg:relative lg:z-auto',
+          'glass fixed inset-y-0 left-0 z-50 flex flex-col overflow-hidden border-r border-sidebar-border transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] lg:relative lg:z-auto',
           // Desktop width
-          collapsed ? 'lg:w-[68px]' : 'lg:w-60',
+          collapsed ? 'lg:w-[72px]' : 'lg:w-64',
           // Mobile: translate off-screen
           mobileOpen ? 'w-64 translate-x-0 shadow-2xl' : '-translate-x-full lg:translate-x-0'
         )}
       >
-        <div className="pointer-events-none absolute inset-0 brand-grid opacity-[0.16]" />
-        <div className="pointer-events-none absolute inset-x-0 top-0 h-44 bg-[radial-gradient(circle_at_top,oklch(0.88_0.1_252/0.26),transparent_68%)]" />
-
         {/* Logo */}
         <div
           className={cn(
             'relative z-10 shrink-0 border-b border-sidebar-border transition-all',
-            collapsed ? 'flex h-16 items-center justify-center px-3' : 'px-4 py-4'
+            collapsed ? 'flex h-16 items-center justify-center px-3' : 'px-5 py-5'
           )}
         >
           {collapsed ? (
-            <div className="flex size-10 items-center justify-center rounded-2xl bg-[linear-gradient(135deg,var(--color-brand-ocean),var(--color-brand-bright))] text-primary-foreground shadow-[0_16px_30px_oklch(0.5_0.18_257/0.25)]">
+            <div className="flex size-10 items-center justify-center rounded-full bg-primary/10 text-primary">
               <Globe className="size-4" />
             </div>
           ) : (
             <>
               <button
                 onClick={() => setMobileOpen(false)}
-                className="absolute right-4 top-4 flex size-7 items-center justify-center rounded-lg text-muted-foreground hover:bg-white/80 hover:text-foreground transition-colors lg:hidden"
+                className="absolute right-5 top-5 flex size-8 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground lg:hidden"
               >
                 <X className="size-4" />
               </button>
-              <div className="brand-panel flex items-center justify-center rounded-[1.5rem] p-3">
+              <div className="flex items-center justify-center rounded-[1.5rem] bg-white/60 p-4">
                 <Image
                   src="/brand/blueprints-logo.png"
                   alt="Blueprints for Pangaea"
                   width={936}
                   height={556}
                   priority
-                  className="h-auto w-[10.75rem]"
+                  className="h-auto w-[11rem]"
                 />
               </div>
-              <div className="mt-3 space-y-1 px-1">
-                <p className="text-[10px] font-semibold uppercase tracking-[0.34em] text-muted-foreground">
+              <div className="mt-4 space-y-1">
+                <p className="text-[11px] font-medium tracking-[0.02em] text-foreground">
                   Alumni Hub
                 </p>
-                <p className="text-xs leading-relaxed text-muted-foreground">
-                  One place for members, opportunities, updates, and org needs.
+                <p className="text-xs leading-relaxed text-muted-foreground/90">
+                  Members, opportunities, updates, and org needs.
                 </p>
               </div>
             </>
@@ -165,7 +162,7 @@ export default function AppShell({
         <nav className="relative z-10 flex-1 overflow-y-auto px-2 py-3 space-y-0.5">
           <p
             className={cn(
-              'mb-2 px-3 text-[10px] font-semibold uppercase tracking-[0.32em] text-muted-foreground/80 transition-opacity',
+              'mb-2 px-4 text-[11px] font-medium text-muted-foreground transition-opacity',
               collapsed && 'lg:opacity-0'
             )}
           >
@@ -179,10 +176,10 @@ export default function AppShell({
                 key={item.href}
                 href={item.href}
                 className={cn(
-                  'group relative flex h-10 items-center gap-3 rounded-2xl px-3 text-sm font-medium transition-all duration-150',
+                  'group relative flex h-11 items-center gap-3 rounded-2xl px-4 text-[15px] font-medium transition-all duration-150',
                   active
-                    ? 'bg-[linear-gradient(135deg,var(--color-brand-ocean),var(--color-brand-bright))] text-primary-foreground shadow-[0_16px_28px_oklch(0.5_0.18_257/0.26)]'
-                    : 'text-muted-foreground hover:bg-white/80 hover:text-foreground',
+                    ? 'bg-primary/10 text-foreground shadow-[inset_0_0_0_1px_oklch(0.58_0.06_255/0.14)]'
+                    : 'text-muted-foreground hover:bg-secondary hover:text-foreground',
                   collapsed && 'lg:justify-center lg:px-0'
                 )}
               >
@@ -204,7 +201,7 @@ export default function AppShell({
               />
               <p
                 className={cn(
-                  'mb-2 px-3 text-[10px] font-semibold uppercase tracking-[0.32em] text-muted-foreground/80 transition-opacity',
+                  'mb-2 px-4 text-[11px] font-medium text-muted-foreground transition-opacity',
                   collapsed && 'lg:opacity-0'
                 )}
               >
@@ -213,10 +210,10 @@ export default function AppShell({
               <Link
                 href="/admin"
                 className={cn(
-                  'group flex h-10 items-center gap-3 rounded-2xl px-3 text-sm font-medium transition-all duration-150',
+                  'group flex h-11 items-center gap-3 rounded-2xl px-4 text-[15px] font-medium transition-all duration-150',
                   pathname === '/admin'
-                    ? 'bg-[linear-gradient(135deg,var(--color-brand-ocean),var(--color-brand-bright))] text-primary-foreground shadow-[0_16px_28px_oklch(0.5_0.18_257/0.26)]'
-                    : 'text-muted-foreground hover:bg-white/80 hover:text-foreground',
+                    ? 'bg-primary/10 text-foreground shadow-[inset_0_0_0_1px_oklch(0.58_0.06_255/0.14)]'
+                    : 'text-muted-foreground hover:bg-secondary hover:text-foreground',
                   collapsed && 'lg:justify-center lg:px-0'
                 )}
               >
@@ -231,12 +228,12 @@ export default function AppShell({
 
         {!collapsed && (
           <div className="relative z-10 px-3 pb-3">
-            <div className="brand-panel rounded-[1.4rem] p-3">
-              <p className="text-[10px] font-semibold uppercase tracking-[0.32em] text-muted-foreground">
-                Atlas Mode
+            <div className="rounded-[1.5rem] border border-border bg-white/60 p-4">
+              <p className="text-sm font-medium text-foreground">
+                Blueprints for Pangaea
               </p>
-              <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
-                Use the hub to keep alumni visibility high and team asks easy to find.
+              <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
+                A quieter interface for alumni context, events, and live team requests.
               </p>
             </div>
           </div>
@@ -247,7 +244,7 @@ export default function AppShell({
           <button
             onClick={() => setCollapsed(!collapsed)}
             className={cn(
-              'flex h-9 w-full items-center gap-2 rounded-2xl px-3 text-xs text-muted-foreground transition-all duration-150 hover:bg-white/80 hover:text-foreground',
+              'flex h-10 w-full items-center gap-2 rounded-2xl px-4 text-sm text-muted-foreground transition-all duration-150 hover:bg-secondary hover:text-foreground',
               collapsed && 'justify-center px-0'
             )}
           >
@@ -266,23 +263,25 @@ export default function AppShell({
       {/* ── Main Area ────────────────────────────────────────────────────── */}
       <div className="flex flex-1 flex-col min-w-0">
         {/* Top Navigation */}
-        <header className="glass sticky top-0 z-30 flex min-h-16 shrink-0 items-center justify-between border-b border-white/50 px-4 py-3 lg:px-6">
+        <header className="glass sticky top-0 z-30 flex min-h-16 shrink-0 items-center justify-between border-b border-white/60 px-4 py-3 lg:px-8">
           <div className="flex min-w-0 items-center gap-3">
             {/* Mobile menu */}
             <button
               onClick={() => setMobileOpen(true)}
-              className="flex size-8 items-center justify-center rounded-xl text-muted-foreground transition-colors hover:bg-white/80 hover:text-foreground lg:hidden"
+              className="flex size-9 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground lg:hidden"
             >
               <Menu className="size-5" />
             </button>
 
             <div className="hidden min-w-0 sm:block">
-              <p className="text-[10px] font-semibold uppercase tracking-[0.34em] text-muted-foreground">
+              <p className="text-[11px] font-medium text-muted-foreground">
                 Blueprints for Pangaea
               </p>
-              <div className="mt-1 flex min-w-0 items-center gap-2">
-                <p className="truncate text-sm font-semibold text-foreground">{routeMeta.title}</p>
-                <span className="hidden text-xs text-muted-foreground lg:inline">
+              <div className="mt-1 flex min-w-0 items-center gap-3">
+                <p className="truncate text-[1.1rem] font-semibold tracking-[-0.02em] text-foreground">
+                  {routeMeta.title}
+                </p>
+                <span className="hidden text-sm text-muted-foreground lg:inline">
                   {routeMeta.subtitle}
                 </span>
               </div>
@@ -294,7 +293,7 @@ export default function AppShell({
               <input
                 type="text"
                 placeholder="Search alumni, teams, and resources"
-                className="h-9 w-60 lg:w-80 rounded-2xl border border-[oklch(0.8_0.05_252/0.45)] bg-white/80 pl-9 pr-3 text-sm text-foreground placeholder:text-muted-foreground/70 outline-none transition-all duration-200 focus:w-84 focus:border-ring focus:bg-background focus:ring-2 focus:ring-ring/20 focus:shadow-[0_0_0_4px_oklch(0.57_0.18_257/0.08)]"
+                className="h-10 w-60 lg:w-80 rounded-full border border-border bg-card/90 pl-9 pr-4 text-sm text-foreground placeholder:text-muted-foreground/70 outline-none transition-all duration-200 focus:w-84 focus:border-ring focus:bg-background focus:ring-2 focus:ring-ring/15"
               />
             </div>
           </div>
@@ -312,8 +311,8 @@ export default function AppShell({
 
         {/* Page Content */}
         <main className="relative flex-1 overflow-y-auto">
-          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_right,oklch(0.89_0.08_250/0.25),transparent_32%)]" />
-          <div className="relative mx-auto w-full max-w-7xl px-4 py-6 lg:px-8 lg:py-8">
+          <div className="pointer-events-none absolute inset-x-0 top-0 h-64 bg-[radial-gradient(circle_at_top,oklch(0.98_0.02_250/0.85),transparent_62%)]" />
+          <div className="relative mx-auto w-full max-w-7xl px-4 py-6 lg:px-8 lg:py-10">
             {children}
           </div>
         </main>
