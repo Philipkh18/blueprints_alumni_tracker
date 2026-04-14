@@ -19,6 +19,7 @@ type InternshipDraft = Omit<Internship, 'id' | 'profile_id'> & { id?: string }
 type ClubDraft = Omit<Club, 'id' | 'profile_id'> & { id?: string }
 
 const STATUS_OPTIONS = ['', 'Current Member', 'Alumni'] as const
+const EMPLOYMENT_TYPE_OPTIONS = ['', 'Internship', 'Full-Time', 'Part-Time', 'Contract'] as const
 
 export default function ProfileForm({ profile, internships, clubs, isAdminEdit }: Props) {
   const router = useRouter()
@@ -48,7 +49,10 @@ export default function ProfileForm({ profile, internships, clubs, isAdminEdit }
   function addInternship() {
     setInternshipList((prev) => [
       ...prev,
-      { company: '', role: '', start_date: '', end_date: null, description: null },
+      {
+        company: '', role: '', start_date: '', end_date: null, description: null,
+        employment_type: null, industry: null, location: null, is_current: false,
+      },
     ])
   }
 
@@ -56,9 +60,13 @@ export default function ProfileForm({ profile, internships, clubs, isAdminEdit }
     setInternshipList((prev) => prev.filter((_, i) => i !== idx))
   }
 
-  function updateInternship(idx: number, field: keyof InternshipDraft, value: string) {
+  function updateInternship(idx: number, field: keyof InternshipDraft, value: string | boolean) {
     setInternshipList((prev) =>
-      prev.map((item, i) => (i === idx ? { ...item, [field]: value || null } : item))
+      prev.map((item, i) => {
+        if (i !== idx) return item
+        if (field === 'is_current') return { ...item, is_current: value as boolean }
+        return { ...item, [field]: (value as string) || null }
+      })
     )
   }
 
@@ -278,10 +286,10 @@ export default function ProfileForm({ profile, internships, clubs, isAdminEdit }
         </div>
       </section>
 
-      {/* Internships */}
+      {/* Work Experience */}
       <section className="space-y-4">
         <div className="flex items-center justify-between">
-          <h2 className="text-lg font-semibold">Internships</h2>
+          <h2 className="text-lg font-semibold">Work Experience</h2>
           <Button type="button" variant="outline" size="sm" onClick={addInternship}>
             + Add
           </Button>
@@ -318,6 +326,29 @@ export default function ProfileForm({ profile, internships, clubs, isAdminEdit }
 
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1">
+                <Label>Type</Label>
+                <select
+                  value={item.employment_type ?? ''}
+                  onChange={(e) => updateInternship(idx, 'employment_type', e.target.value)}
+                  className="h-8 w-full rounded-lg border border-input bg-transparent px-2.5 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+                >
+                  {EMPLOYMENT_TYPE_OPTIONS.map((opt) => (
+                    <option key={opt} value={opt}>{opt || 'Not set'}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="space-y-1">
+                <Label>Industry</Label>
+                <Input
+                  value={item.industry ?? ''}
+                  onChange={(e) => updateInternship(idx, 'industry', e.target.value)}
+                  placeholder="e.g. Technology, Finance"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1">
                 <Label>Start Date *</Label>
                 <Input
                   type="date"
@@ -336,6 +367,15 @@ export default function ProfileForm({ profile, internships, clubs, isAdminEdit }
             </div>
 
             <div className="space-y-1">
+              <Label>Location</Label>
+              <Input
+                value={item.location ?? ''}
+                onChange={(e) => updateInternship(idx, 'location', e.target.value)}
+                placeholder="e.g. New York, NY"
+              />
+            </div>
+
+            <div className="space-y-1">
               <Label>Description</Label>
               <Textarea
                 value={item.description ?? ''}
@@ -344,6 +384,16 @@ export default function ProfileForm({ profile, internships, clubs, isAdminEdit }
                 placeholder="Brief description (optional)"
               />
             </div>
+
+            <label className="flex items-center gap-2 text-sm">
+              <input
+                type="checkbox"
+                checked={item.is_current}
+                onChange={(e) => updateInternship(idx, 'is_current', e.target.checked)}
+                className="rounded border-input"
+              />
+              This is my current role
+            </label>
           </div>
         ))}
       </section>

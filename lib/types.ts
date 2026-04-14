@@ -20,7 +20,9 @@ export type Profile = {
   fun_fact: string | null
 }
 
-export type Internship = {
+export type EmploymentType = 'Internship' | 'Full-Time' | 'Part-Time' | 'Contract'
+
+export type WorkExperience = {
   id: string
   profile_id: string
   company: string
@@ -28,7 +30,14 @@ export type Internship = {
   start_date: string
   end_date: string | null
   description: string | null
+  employment_type: EmploymentType | null
+  industry: string | null
+  location: string | null
+  is_current: boolean
 }
+
+/** @deprecated Use WorkExperience instead */
+export type Internship = WorkExperience
 
 export type Club = {
   id: string
