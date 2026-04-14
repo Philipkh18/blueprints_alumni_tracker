@@ -9,6 +9,7 @@ import {
 } from '@/lib/notion'
 import InternshipList from '@/components/InternshipList'
 import ClubList from '@/components/ClubList'
+import ProfileMediaEditor from '@/components/profile/ProfileMediaEditor'
 import { Badge } from '@/components/ui/badge'
 import { buttonVariants } from '@/components/ui/button-variants'
 import {
@@ -41,13 +42,6 @@ export default async function ProfilePage({ params }: { params: Promise<{ id: st
   const canEdit = isOwner || isAdmin
   const isAlumni = profile.status === 'Alumni'
 
-  const initials = profile.full_name
-    .split(' ')
-    .map((n: string) => n[0])
-    .slice(0, 2)
-    .join('')
-    .toUpperCase()
-
   return (
     <div className="mx-auto max-w-3xl space-y-6 animate-fade-up">
       {/* Back link */}
@@ -61,36 +55,19 @@ export default async function ProfilePage({ params }: { params: Promise<{ id: st
 
       {/* Header card */}
       <div className="brand-panel overflow-hidden rounded-[2rem]">
-        {/* Gradient banner */}
-        <div
-          className="relative h-24 bg-[linear-gradient(135deg,var(--color-brand-ocean),var(--color-brand-bright))]"
-          style={
-            profile.banner_url
-              ? {
-                  backgroundImage: `linear-gradient(135deg, oklch(0.2 0.03 255 / 0.42), oklch(0.4 0.12 255 / 0.2)), url(${profile.banner_url})`,
-                  backgroundPosition: 'center',
-                  backgroundSize: 'cover',
-                }
-              : undefined
-          }
-        >
-          <div className="absolute inset-0 brand-grid opacity-20" />
-        </div>
+        <ProfileMediaEditor
+          profileId={profile.id}
+          fullName={profile.full_name}
+          initialAvatarUrl={profile.avatar_url}
+          initialBannerUrl={profile.banner_url}
+          variant="profile"
+          editable={canEdit}
+        />
 
         <div className="relative px-6 pb-6">
           {/* Avatar — overlapping the banner */}
           <div className="-mt-12 flex items-end justify-between">
-            {profile.avatar_url ? (
-              <img
-                src={profile.avatar_url}
-                alt={profile.full_name}
-                className="size-24 rounded-full border-4 border-white object-cover shadow-[0_8px_24px_oklch(0.22_0.07_257/0.15)]"
-              />
-            ) : (
-              <div className="flex size-24 items-center justify-center rounded-full border-4 border-white bg-[linear-gradient(135deg,var(--color-brand-ocean),var(--color-brand-bright))] text-2xl font-bold text-primary-foreground shadow-[0_8px_24px_oklch(0.5_0.18_257/0.2)]">
-                {initials}
-              </div>
-            )}
+            <div className="size-24 shrink-0" />
 
             {canEdit && (
               <Link

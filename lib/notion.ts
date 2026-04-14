@@ -53,6 +53,20 @@ function getRelationId(page: PageObjectResponse, prop: string): string | null {
   return p?.type === 'relation' ? (p.relation[0]?.id ?? null) : null
 }
 
+function getPageIconUrl(page: PageObjectResponse): string | null {
+  if (!page.icon) return null
+  if (page.icon.type === 'external') return page.icon.external.url
+  if (page.icon.type === 'file') return page.icon.file.url
+  return null
+}
+
+function getPageCoverUrl(page: PageObjectResponse): string | null {
+  if (!page.cover) return null
+  if (page.cover.type === 'external') return page.cover.external.url
+  if (page.cover.type === 'file') return page.cover.file.url
+  return null
+}
+
 // ─── Page → Type converters ──────────────────────────────────────────────────
 
 export function pageToProfile(page: PageObjectResponse): Profile {
@@ -68,8 +82,8 @@ export function pageToProfile(page: PageObjectResponse): Profile {
     github_url: getUrl(page, 'github_url'),
     instagram_url: getUrl(page, 'instagram_url'),
     contact_email: getText(page, 'contact_email') || null,
-    avatar_url: getUrl(page, 'avatar_url'),
-    banner_url: getUrl(page, 'banner_url'),
+    avatar_url: getPageIconUrl(page) ?? getUrl(page, 'avatar_url'),
+    banner_url: getPageCoverUrl(page) ?? getUrl(page, 'banner_url'),
     is_admin: getBool(page, 'is_admin'),
     created_at: page.created_time,
     status: (getSelect(page, 'status') as MemberStatus) ?? null,

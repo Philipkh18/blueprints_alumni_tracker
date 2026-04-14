@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { normalizeUrlInput } from '@/lib/company-brand'
+import ProfileMediaEditor from '@/components/profile/ProfileMediaEditor'
 
 type Props = {
   profile: Profile
@@ -33,8 +34,6 @@ export default function ProfileForm({ profile, internships, clubs, isAdminEdit }
   const [minor, setMinor] = useState(profile.minor ?? '')
   const [bio, setBio] = useState(profile.bio ?? '')
   const [linkedin, setLinkedin] = useState(profile.linkedin_url ?? '')
-  const [avatarUrl, setAvatarUrl] = useState(profile.avatar_url ?? '')
-  const [bannerUrl, setBannerUrl] = useState(profile.banner_url ?? '')
   const [status, setStatus] = useState(profile.status ?? '')
   const [team, setTeam] = useState(profile.team ?? '')
   const [roleTitle, setRoleTitle] = useState(profile.role_title ?? '')
@@ -109,9 +108,6 @@ export default function ProfileForm({ profile, internships, clubs, isAdminEdit }
       .split(',')
       .map((s) => s.trim())
       .filter(Boolean)
-
-    const normalizedAvatarUrl = normalizeUrlInput(avatarUrl)
-    const normalizedBannerUrl = normalizeUrlInput(bannerUrl)
     const normalizedInternships = internshipList.map((item) => ({
       ...item,
       company_website: normalizeUrlInput(item.company_website),
@@ -129,8 +125,6 @@ export default function ProfileForm({ profile, internships, clubs, isAdminEdit }
             minor: minor || null,
             bio: bio || null,
             linkedin_url: linkedin || null,
-            avatar_url: normalizedAvatarUrl,
-            banner_url: normalizedBannerUrl,
             status: status || null,
             team: team || null,
             role_title: roleTitle || null,
@@ -266,43 +260,12 @@ export default function ProfileForm({ profile, internships, clubs, isAdminEdit }
           />
         </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="avatar_url">Profile Picture URL</Label>
-          <Input
-            id="avatar_url"
-            type="url"
-            value={avatarUrl}
-            onChange={(e) => setAvatarUrl(e.target.value)}
-            placeholder="https://example.com/avatar.jpg"
-          />
-          {avatarUrl && (
-            <img
-              src={normalizeUrlInput(avatarUrl) ?? avatarUrl}
-              alt="Profile preview"
-              className="size-16 rounded-full border border-border object-cover"
-            />
-          )}
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="banner_url">Profile Banner URL</Label>
-          <Input
-            id="banner_url"
-            type="url"
-            value={bannerUrl}
-            onChange={(e) => setBannerUrl(e.target.value)}
-            placeholder="https://example.com/banner.jpg"
-          />
-          {bannerUrl && (
-            <div className="overflow-hidden rounded-xl border border-border">
-              <img
-                src={normalizeUrlInput(bannerUrl) ?? bannerUrl}
-                alt="Banner preview"
-                className="h-28 w-full object-cover"
-              />
-            </div>
-          )}
-        </div>
+        <ProfileMediaEditor
+          profileId={profile.id}
+          fullName={profile.full_name}
+          initialAvatarUrl={profile.avatar_url}
+          initialBannerUrl={profile.banner_url}
+        />
 
         <div className="space-y-2">
           <Label htmlFor="skills">Skills & Interests</Label>
