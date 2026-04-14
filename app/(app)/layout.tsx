@@ -7,8 +7,12 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   let isAdmin = false
 
   if (user) {
-    const profile = await getProfileByClerkId(user.id)
-    isAdmin = profile?.is_admin ?? false
+    try {
+      const profile = await getProfileByClerkId(user.id)
+      isAdmin = profile?.is_admin ?? false
+    } catch (error) {
+      console.error('Failed to load current user profile for app layout.', error)
+    }
   }
 
   return (
