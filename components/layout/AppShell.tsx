@@ -20,6 +20,7 @@ import {
   Search,
   Globe,
   X,
+  User,
 } from 'lucide-react'
 
 const NAV_ITEMS = [
@@ -72,9 +73,11 @@ const ROUTE_META = [
 export default function AppShell({
   children,
   isAdmin,
+  profileHref,
 }: {
   children: React.ReactNode
   isAdmin: boolean
+  profileHref: string
 }) {
   const [collapsed, setCollapsed] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
@@ -305,7 +308,15 @@ export default function AppShell({
                   avatarBox: 'size-8 ring-2 ring-background shadow-sm',
                 },
               }}
-            />
+            >
+              <UserButton.MenuItems>
+                <UserButton.Link
+                  href={profileHref}
+                  label="My Profile"
+                  labelIcon={<User className="size-4" />}
+                />
+              </UserButton.MenuItems>
+            </UserButton>
           </div>
         </header>
 
