@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
+import { normalizeUrlInput } from '@/lib/company-brand'
 
 type Props = {
   profile: Profile
@@ -32,6 +33,8 @@ export default function ProfileForm({ profile, internships, clubs, isAdminEdit }
   const [minor, setMinor] = useState(profile.minor ?? '')
   const [bio, setBio] = useState(profile.bio ?? '')
   const [linkedin, setLinkedin] = useState(profile.linkedin_url ?? '')
+  const [avatarUrl, setAvatarUrl] = useState(profile.avatar_url ?? '')
+  const [bannerUrl, setBannerUrl] = useState(profile.banner_url ?? '')
   const [status, setStatus] = useState(profile.status ?? '')
   const [team, setTeam] = useState(profile.team ?? '')
   const [roleTitle, setRoleTitle] = useState(profile.role_title ?? '')
@@ -51,7 +54,8 @@ export default function ProfileForm({ profile, internships, clubs, isAdminEdit }
       ...prev,
       {
         company: '', role: '', start_date: '', end_date: null, description: null,
-        employment_type: null, industry: null, location: null, is_current: false,
+        employment_type: null, industry: null, location: null, company_website: null,
+        is_current: false,
       },
     ])
   }
@@ -106,6 +110,13 @@ export default function ProfileForm({ profile, internships, clubs, isAdminEdit }
       .map((s) => s.trim())
       .filter(Boolean)
 
+    const normalizedAvatarUrl = normalizeUrlInput(avatarUrl)
+    const normalizedBannerUrl = normalizeUrlInput(bannerUrl)
+    const normalizedInternships = internshipList.map((item) => ({
+      ...item,
+      company_website: normalizeUrlInput(item.company_website),
+    }))
+
     try {
       const res = await fetch(`/api/profiles/${profile.id}`, {
         method: 'PATCH',
@@ -118,6 +129,8 @@ export default function ProfileForm({ profile, internships, clubs, isAdminEdit }
             minor: minor || null,
             bio: bio || null,
             linkedin_url: linkedin || null,
+            avatar_url: normalizedAvatarUrl,
+            banner_url: normalizedBannerUrl,
             status: status || null,
             team: team || null,
             role_title: roleTitle || null,
@@ -125,7 +138,7 @@ export default function ProfileForm({ profile, internships, clubs, isAdminEdit }
             skills,
             fun_fact: funFact || null,
           },
-          internships: internshipList,
+          internships: normalizedInternships,
           clubs: clubList,
         }),
       })
@@ -254,6 +267,44 @@ export default function ProfileForm({ profile, internships, clubs, isAdminEdit }
         </div>
 
         <div className="space-y-2">
+          <Label htmlFor="avatar_url">Profile Picture URL</Label>
+          <Input
+            id="avatar_url"
+            type="url"
+            value={avatarUrl}
+            onChange={(e) => setAvatarUrl(e.target.value)}
+            placeholder="https://example.com/avatar.jpg"
+          />
+          {avatarUrl && (
+            <img
+              src={normalizeUrlInput(avatarUrl) ?? avatarUrl}
+              alt="Profile preview"
+              className="size-16 rounded-full border border-border object-cover"
+            />
+          )}
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="banner_url">Profile Banner URL</Label>
+          <Input
+            id="banner_url"
+            type="url"
+            value={bannerUrl}
+            onChange={(e) => setBannerUrl(e.target.value)}
+            placeholder="https://example.com/banner.jpg"
+          />
+          {bannerUrl && (
+            <div className="overflow-hidden rounded-xl border border-border">
+              <img
+                src={normalizeUrlInput(bannerUrl) ?? bannerUrl}
+                alt="Banner preview"
+                className="h-28 w-full object-cover"
+              />
+            </div>
+          )}
+        </div>
+
+        <div className="space-y-2">
           <Label htmlFor="skills">Skills & Interests</Label>
           <Input
             id="skills"
@@ -373,6 +424,18 @@ export default function ProfileForm({ profile, internships, clubs, isAdminEdit }
                 onChange={(e) => updateInternship(idx, 'location', e.target.value)}
                 placeholder="e.g. New York, NY"
               />
+            </div>
+
+            <div className="space-y-1">
+              <Label>Company Website</Label>
+              <Input
+                value={item.company_website ?? ''}
+                onChange={(e) => updateInternship(idx, 'company_website', e.target.value)}
+                placeholder="company.com or https://company.com"
+              />
+              <p className="text-[11px] text-muted-foreground">
+                Used to pull the company icon automatically.
+              </p>
             </div>
 
             <div className="space-y-1">

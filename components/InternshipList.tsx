@@ -1,6 +1,7 @@
 import type { WorkExperience } from '@/lib/types'
 import { Badge } from '@/components/ui/badge'
-import { MapPin } from 'lucide-react'
+import { MapPin, Building2 } from 'lucide-react'
+import { getCompanyLogoUrl } from '@/lib/company-brand'
 
 type Props = { internships: WorkExperience[] }
 
@@ -16,9 +17,24 @@ export default function InternshipList({ internships }: Props) {
       {internships.map((i) => (
         <div key={i.id} className="border-l-2 border-muted pl-4">
           <div className="flex items-start justify-between gap-2">
-            <div>
+            <div className="flex items-start gap-3">
+              <div className="mt-0.5 flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-border bg-background">
+                {getCompanyLogoUrl(i.company_website) ? (
+                  <img
+                    src={getCompanyLogoUrl(i.company_website)!}
+                    alt={`${i.company} logo`}
+                    className="size-7 object-contain"
+                    loading="lazy"
+                    referrerPolicy="no-referrer"
+                  />
+                ) : (
+                  <Building2 className="size-4 text-muted-foreground" />
+                )}
+              </div>
+              <div>
               <p className="font-medium">{i.role}</p>
               <p className="text-sm text-muted-foreground">{i.company}</p>
+              </div>
             </div>
             <div className="flex items-center gap-1.5 shrink-0">
               {i.is_current && (

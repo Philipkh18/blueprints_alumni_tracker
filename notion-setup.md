@@ -25,6 +25,7 @@ Create these as full-page databases in Notion. The property names must match exa
 | `bio`           | Text     |                              |
 | `linkedin_url`  | URL      |                              |
 | `avatar_url`    | URL      |                              |
+| `banner_url`    | URL      | Profile header image         |
 | `is_admin`      | Checkbox | Default: unchecked           |
 
 Copy the database ID → `NOTION_PROFILES_DB_ID`
@@ -41,6 +42,7 @@ Copy the database ID → `NOTION_PROFILES_DB_ID`
 | `start_date`  | Date              |                              |
 | `end_date`    | Date              | Leave blank if current       |
 | `description` | Text              |                              |
+| `company_website` | URL           | Used to pull company icon    |
 
 Copy the database ID → `NOTION_INTERNSHIPS_DB_ID`
 

@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
+import { getCompanyLogoUrl } from '@/lib/company-brand'
 import {
   Search,
   X,
@@ -190,6 +191,9 @@ function CompanyCard({ group }: { group: CompanyGroup }) {
   const [expanded, setExpanded] = useState(false)
   const displayExps = expanded ? group.experiences : group.experiences.slice(0, 3)
   const hasMore = group.experiences.length > 3
+  const companyLogoUrl = group.experiences
+    .map((exp) => getCompanyLogoUrl(exp.company_website))
+    .find(Boolean)
 
   return (
     <div className="brand-panel rounded-[1.5rem] overflow-hidden">
@@ -199,8 +203,18 @@ function CompanyCard({ group }: { group: CompanyGroup }) {
         className="flex w-full items-center justify-between gap-3 px-5 py-4 text-left hover:bg-accent/30 transition-colors"
       >
         <div className="flex items-center gap-3 min-w-0">
-          <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-secondary text-secondary-foreground">
-            <Building2 className="size-4" />
+          <div className="flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-border bg-secondary text-secondary-foreground">
+            {companyLogoUrl ? (
+              <img
+                src={companyLogoUrl}
+                alt={`${group.company} logo`}
+                className="size-7 object-contain"
+                loading="lazy"
+                referrerPolicy="no-referrer"
+              />
+            ) : (
+              <Building2 className="size-4" />
+            )}
           </div>
           <div className="min-w-0">
             <p className="text-sm font-semibold truncate">{group.company}</p>

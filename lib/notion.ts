@@ -65,14 +65,22 @@ export function pageToProfile(page: PageObjectResponse): Profile {
     minor: getText(page, 'minor') || null,
     bio: getText(page, 'bio') || null,
     linkedin_url: getUrl(page, 'linkedin_url'),
+    github_url: getUrl(page, 'github_url'),
+    instagram_url: getUrl(page, 'instagram_url'),
+    contact_email: getText(page, 'contact_email') || null,
     avatar_url: getUrl(page, 'avatar_url'),
+    banner_url: getUrl(page, 'banner_url'),
     is_admin: getBool(page, 'is_admin'),
     created_at: page.created_time,
     status: (getSelect(page, 'status') as MemberStatus) ?? null,
     team: getSelect(page, 'team') ?? null,
     role_title: getText(page, 'role_title') || null,
     location: getText(page, 'location') || null,
+    hometown: getText(page, 'hometown') || null,
     skills: getMultiSelect(page, 'skills'),
+    hobbies: getMultiSelect(page, 'hobbies'),
+    current_classes: getMultiSelect(page, 'current_classes'),
+    chapter_role: getText(page, 'chapter_role') || null,
     fun_fact: getText(page, 'fun_fact') || null,
   }
 }
@@ -89,6 +97,7 @@ export function pageToWorkExperience(page: PageObjectResponse): WorkExperience {
     employment_type: (getSelect(page, 'employment_type') as EmploymentType) ?? null,
     industry: getSelect(page, 'industry') ?? null,
     location: getText(page, 'location') || null,
+    company_website: getUrl(page, 'company_website'),
     is_current: getBool(page, 'is_current'),
   }
 }
@@ -224,6 +233,8 @@ export async function updateProfile(
     minor: string | null
     bio: string | null
     linkedin_url: string | null
+    avatar_url?: string | null
+    banner_url?: string | null
     status?: string | null
     team?: string | null
     role_title?: string | null
@@ -242,6 +253,12 @@ export async function updateProfile(
     linkedin_url: { url: data.linkedin_url },
   }
 
+  if (data.avatar_url !== undefined) {
+    properties.avatar_url = { url: data.avatar_url }
+  }
+  if (data.banner_url !== undefined) {
+    properties.banner_url = { url: data.banner_url }
+  }
   if (data.role_title !== undefined) {
     properties.role_title = { rich_text: [{ text: { content: data.role_title ?? '' } }] }
   }
@@ -277,6 +294,7 @@ export async function syncInternships(
     employment_type?: string | null
     industry?: string | null
     location?: string | null
+    company_website?: string | null
     is_current?: boolean
   }>
 ): Promise<void> {
@@ -304,6 +322,9 @@ export async function syncInternships(
         }
         if (i.location) {
           properties.location = { rich_text: [{ text: { content: i.location } }] }
+        }
+        if (i.company_website) {
+          properties.company_website = { url: i.company_website }
         }
         return notion.pages.create({ parent: { database_id: INTERNSHIPS_DB }, properties })
       })

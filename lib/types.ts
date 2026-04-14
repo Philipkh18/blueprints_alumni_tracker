@@ -9,14 +9,22 @@ export type Profile = {
   minor: string | null
   bio: string | null
   linkedin_url: string | null
+  github_url: string | null
+  instagram_url: string | null
+  contact_email: string | null
   avatar_url: string | null
+  banner_url: string | null
   is_admin: boolean
   created_at: string
   status: MemberStatus | null
   team: string | null
   role_title: string | null
   location: string | null
+  hometown: string | null
   skills: string[]
+  hobbies: string[]
+  current_classes: string[]
+  chapter_role: string | null
   fun_fact: string | null
 }
 
@@ -33,6 +41,7 @@ export type WorkExperience = {
   employment_type: EmploymentType | null
   industry: string | null
   location: string | null
+  company_website: string | null
   is_current: boolean
 }
 

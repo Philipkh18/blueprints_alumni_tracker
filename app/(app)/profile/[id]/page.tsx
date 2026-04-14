@@ -62,7 +62,18 @@ export default async function ProfilePage({ params }: { params: Promise<{ id: st
       {/* Header card */}
       <div className="brand-panel overflow-hidden rounded-[2rem]">
         {/* Gradient banner */}
-        <div className="h-24 bg-[linear-gradient(135deg,var(--color-brand-ocean),var(--color-brand-bright))] relative">
+        <div
+          className="relative h-24 bg-[linear-gradient(135deg,var(--color-brand-ocean),var(--color-brand-bright))]"
+          style={
+            profile.banner_url
+              ? {
+                  backgroundImage: `linear-gradient(135deg, oklch(0.2 0.03 255 / 0.42), oklch(0.4 0.12 255 / 0.2)), url(${profile.banner_url})`,
+                  backgroundPosition: 'center',
+                  backgroundSize: 'cover',
+                }
+              : undefined
+          }
+        >
           <div className="absolute inset-0 brand-grid opacity-20" />
         </div>
 
