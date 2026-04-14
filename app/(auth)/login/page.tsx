@@ -1,9 +1,13 @@
 import { SignIn } from '@clerk/nextjs'
+import AuthFrame from '@/components/auth/AuthFrame'
 
 export default function LoginPage() {
   return (
-    <main className="min-h-screen flex items-center justify-center bg-muted/40">
+    <AuthFrame
+      title="Welcome back"
+      description="Sign in to reach the Blueprints for Pangaea alumni directory, updates, and opportunities."
+    >
       <SignIn />
-    </main>
+    </AuthFrame>
   )
 }

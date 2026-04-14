@@ -76,37 +76,39 @@ export default async function QuickLinksSection() {
   const groups = groupByCategory(links)
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center gap-2">
-        <Link2 className="size-4 text-primary" />
-        <h2 className="text-sm font-semibold text-foreground">Quick Links & Resources</h2>
-      </div>
+    <div className="brand-panel brand-grid relative overflow-hidden rounded-[1.75rem] p-4 sm:p-5">
+      <div className="relative space-y-4">
+        <div className="flex items-center gap-2">
+          <Link2 className="size-4 text-primary" />
+          <h2 className="text-sm font-semibold text-foreground">Quick Links & Resources</h2>
+        </div>
 
-      {error ? (
-        <p className="text-sm text-muted-foreground">Could not load links. Try refreshing.</p>
-      ) : links.length === 0 ? (
-        <div className="py-6 text-center">
-          <Link2 className="mx-auto size-8 text-muted-foreground/30 mb-2" />
-          <p className="text-sm text-muted-foreground">No links added yet.</p>
-        </div>
-      ) : (
-        <div className="space-y-5">
-          {groups.map(({ category, links: groupLinks }) => (
-            <div key={category} className="space-y-2.5">
-              {groups.length > 1 && (
-                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                  {category}
-                </p>
-              )}
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
-                {groupLinks.map((link, i) => (
-                  <LinkCard key={link.id} link={link} index={i} />
-                ))}
+        {error ? (
+          <p className="text-sm text-muted-foreground">Could not load links. Try refreshing.</p>
+        ) : links.length === 0 ? (
+          <div className="py-6 text-center">
+            <Link2 className="mx-auto mb-2 size-8 text-muted-foreground/30" />
+            <p className="text-sm text-muted-foreground">No links added yet.</p>
+          </div>
+        ) : (
+          <div className="space-y-5">
+            {groups.map(({ category, links: groupLinks }) => (
+              <div key={category} className="space-y-2.5">
+                {groups.length > 1 && (
+                  <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                    {category}
+                  </p>
+                )}
+                <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+                  {groupLinks.map((link, i) => (
+                    <LinkCard key={link.id} link={link} index={i} />
+                  ))}
+                </div>
               </div>
-            </div>
-          ))}
-        </div>
-      )}
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   )
 }
