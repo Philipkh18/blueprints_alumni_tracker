@@ -1,3 +1,5 @@
+export type MemberStatus = 'Current Member' | 'Alumni'
+
 export type Profile = {
   id: string
   clerk_id: string
@@ -10,6 +12,12 @@ export type Profile = {
   avatar_url: string | null
   is_admin: boolean
   created_at: string
+  status: MemberStatus | null
+  team: string | null
+  role_title: string | null
+  location: string | null
+  skills: string[]
+  fun_fact: string | null
 }
 
 export type Internship = {
@@ -84,4 +92,18 @@ export type OrgNeed = {
   team: string | null
   urgency: 'high' | 'medium' | 'low'
   point_person: string | null
+}
+
+// ─── Events page types ────────────────────────────────────────────────────────
+
+export type CalendarEvent = {
+  id: string
+  title: string
+  description: string | null
+  start: string
+  end: string
+  allDay: boolean
+  location: string | null
+  organizer: string | null
+  type: string
 }

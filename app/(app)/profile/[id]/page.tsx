@@ -9,8 +9,17 @@ import {
 } from '@/lib/notion'
 import InternshipList from '@/components/InternshipList'
 import ClubList from '@/components/ClubList'
-import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import { buttonVariants } from '@/components/ui/button-variants'
+import {
+  MapPin,
+  Briefcase,
+  GraduationCap,
+  Linkedin,
+  Pencil,
+  ArrowLeft,
+  Sparkles,
+} from 'lucide-react'
 
 export const dynamic = 'force-dynamic'
 
@@ -30,6 +39,7 @@ export default async function ProfilePage({ params }: { params: Promise<{ id: st
   const isOwner = profile.clerk_id === userId
   const isAdmin = viewer?.is_admin ?? false
   const canEdit = isOwner || isAdmin
+  const isAlumni = profile.status === 'Alumni'
 
   const initials = profile.full_name
     .split(' ')
@@ -39,63 +49,204 @@ export default async function ProfilePage({ params }: { params: Promise<{ id: st
     .toUpperCase()
 
   return (
-    <div className="max-w-2xl space-y-8">
-      {/* Header */}
-      <div className="flex items-start gap-6">
-        {profile.avatar_url ? (
-          <img
-            src={profile.avatar_url}
-            alt={profile.full_name}
-            className="w-20 h-20 rounded-full object-cover shrink-0"
-          />
-        ) : (
-          <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center text-2xl font-semibold text-primary shrink-0">
-            {initials}
-          </div>
-        )}
+    <div className="mx-auto max-w-3xl space-y-6 animate-fade-up">
+      {/* Back link */}
+      <Link
+        href="/dashboard"
+        className="inline-flex items-center gap-1.5 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors"
+      >
+        <ArrowLeft className="size-3" />
+        Back to directory
+      </Link>
 
-        <div className="flex-1 min-w-0">
-          <div className="flex items-start justify-between gap-4">
-            <div>
-              <h1 className="text-2xl font-bold">{profile.full_name}</h1>
-              {profile.graduation_year && (
-                <p className="text-muted-foreground">Class of {profile.graduation_year}</p>
-              )}
-            </div>
+      {/* Header card */}
+      <div className="brand-panel overflow-hidden rounded-[2rem]">
+        {/* Gradient banner */}
+        <div className="h-24 bg-[linear-gradient(135deg,var(--color-brand-ocean),var(--color-brand-bright))] relative">
+          <div className="absolute inset-0 brand-grid opacity-20" />
+        </div>
+
+        <div className="relative px-6 pb-6">
+          {/* Avatar — overlapping the banner */}
+          <div className="-mt-12 flex items-end justify-between">
+            {profile.avatar_url ? (
+              <img
+                src={profile.avatar_url}
+                alt={profile.full_name}
+                className="size-24 rounded-full border-4 border-white object-cover shadow-[0_8px_24px_oklch(0.22_0.07_257/0.15)]"
+              />
+            ) : (
+              <div className="flex size-24 items-center justify-center rounded-full border-4 border-white bg-[linear-gradient(135deg,var(--color-brand-ocean),var(--color-brand-bright))] text-2xl font-bold text-primary-foreground shadow-[0_8px_24px_oklch(0.5_0.18_257/0.2)]">
+                {initials}
+              </div>
+            )}
+
             {canEdit && (
-              <Link href={`/profile/edit?id=${profile.id}`}>
-                <Button variant="outline" size="sm">Edit Profile</Button>
+              <Link
+                href={`/profile/edit?id=${profile.id}`}
+                className={buttonVariants({ variant: 'outline', size: 'sm' }) + ' gap-1.5 mt-14'}
+              >
+                <Pencil className="size-3" />
+                Edit Profile
               </Link>
             )}
           </div>
 
-          <div className="flex flex-wrap gap-2 mt-2">
-            {profile.major && <Badge variant="secondary">{profile.major}</Badge>}
-            {profile.minor && <Badge variant="outline">Minor: {profile.minor}</Badge>}
-          </div>
+          {/* Name & meta */}
+          <div className="mt-4 space-y-3">
+            <div>
+              <h1 className="text-2xl font-semibold tracking-tight">{profile.full_name}</h1>
+              {(profile.role_title || profile.team) && (
+                <p className="text-sm text-muted-foreground">
+                  {profile.role_title}
+                  {profile.role_title && profile.team && ' · '}
+                  {profile.team}
+                </p>
+              )}
+            </div>
 
-          {profile.linkedin_url && (
-            <a
-              href={profile.linkedin_url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-sm text-blue-600 hover:underline mt-2 inline-block"
-            >
-              LinkedIn →
-            </a>
-          )}
+            {/* Info chips */}
+            <div className="flex flex-wrap gap-2">
+              {profile.status && (
+                <Badge variant={isAlumni ? 'outline' : 'default'} className="text-xs">
+                  {profile.status}
+                </Badge>
+              )}
+              {profile.graduation_year && (
+                <Badge variant="secondary" className="text-xs gap-1">
+                  <GraduationCap className="size-3" />
+                  Class of {profile.graduation_year}
+                </Badge>
+              )}
+              {profile.major && (
+                <Badge variant="secondary" className="text-xs">
+                  {profile.major}
+                </Badge>
+              )}
+              {profile.minor && (
+                <Badge variant="outline" className="text-xs">
+                  Minor: {profile.minor}
+                </Badge>
+              )}
+              {profile.location && (
+                <Badge variant="outline" className="text-xs gap-1">
+                  <MapPin className="size-3" />
+                  {profile.location}
+                </Badge>
+              )}
+            </div>
+
+            {/* Skills */}
+            {profile.skills.length > 0 && (
+              <div className="flex flex-wrap gap-1.5">
+                {profile.skills.map((skill) => (
+                  <span
+                    key={skill}
+                    className="brand-chip rounded-full px-2.5 py-0.5 text-[11px] font-medium text-[var(--color-brand-deep)]"
+                  >
+                    {skill}
+                  </span>
+                ))}
+              </div>
+            )}
+
+            {/* Contact links */}
+            {profile.linkedin_url && (
+              <a
+                href={profile.linkedin_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:underline"
+              >
+                <Linkedin className="size-3.5" />
+                LinkedIn Profile
+              </a>
+            )}
+          </div>
         </div>
       </div>
 
-      {profile.bio && (
-        <section>
-          <h2 className="text-lg font-semibold mb-2">About</h2>
-          <p className="text-muted-foreground whitespace-pre-wrap">{profile.bio}</p>
-        </section>
-      )}
+      {/* Content sections */}
+      <div className="grid gap-6 lg:grid-cols-[1fr_280px]">
+        <div className="space-y-6">
+          {/* Bio */}
+          {profile.bio && (
+            <Section title="About">
+              <p className="text-sm leading-relaxed text-muted-foreground whitespace-pre-wrap">
+                {profile.bio}
+              </p>
+            </Section>
+          )}
 
-      <InternshipList internships={internships} />
-      <ClubList clubs={clubs} />
+          {/* Internships */}
+          {internships.length > 0 && (
+            <Section title="Experience" icon={Briefcase}>
+              <InternshipList internships={internships} />
+            </Section>
+          )}
+
+          {/* Clubs */}
+          {clubs.length > 0 && (
+            <Section title="Clubs & Activities">
+              <ClubList clubs={clubs} />
+            </Section>
+          )}
+        </div>
+
+        {/* Sidebar */}
+        <div className="space-y-4">
+          {profile.fun_fact && (
+            <div className="brand-panel rounded-[1.5rem] p-4">
+              <div className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-[0.3em] text-muted-foreground mb-2">
+                <Sparkles className="size-3" />
+                Fun Fact
+              </div>
+              <p className="text-sm leading-relaxed text-foreground">{profile.fun_fact}</p>
+            </div>
+          )}
+
+          <div className="brand-panel rounded-[1.5rem] p-4 space-y-3">
+            <p className="text-xs font-semibold uppercase tracking-[0.3em] text-muted-foreground">
+              Quick Info
+            </p>
+            <InfoRow label="Joined" value={new Date(profile.created_at).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })} />
+            {profile.graduation_year && (
+              <InfoRow label="Class" value={String(profile.graduation_year)} />
+            )}
+            {profile.team && <InfoRow label="Team" value={profile.team} />}
+            {profile.location && <InfoRow label="Location" value={profile.location} />}
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function Section({
+  title,
+  icon: Icon,
+  children,
+}: {
+  title: string
+  icon?: React.ComponentType<{ className?: string }>
+  children: React.ReactNode
+}) {
+  return (
+    <div className="brand-panel rounded-[1.5rem] p-5">
+      <h2 className="mb-3 flex items-center gap-2 text-sm font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+        {Icon && <Icon className="size-3.5" />}
+        {title}
+      </h2>
+      {children}
+    </div>
+  )
+}
+
+function InfoRow({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="flex items-center justify-between text-sm">
+      <span className="text-muted-foreground">{label}</span>
+      <span className="font-medium">{value}</span>
     </div>
   )
 }

@@ -1,6 +1,6 @@
 import { Client } from '@notionhq/client'
 import type { PageObjectResponse } from '@notionhq/client/build/src/api-endpoints'
-import type { Profile, Internship, Club } from './types'
+import type { Profile, MemberStatus, Internship, Club } from './types'
 
 export const notion = new Client({ auth: process.env.NOTION_TOKEN })
 
@@ -38,6 +38,16 @@ function getDate(page: PageObjectResponse, prop: string): string | null {
   return p?.type === 'date' ? (p.date?.start ?? null) : null
 }
 
+function getSelect(page: PageObjectResponse, prop: string): string | null {
+  const p = page.properties[prop]
+  return p?.type === 'select' ? (p.select?.name ?? null) : null
+}
+
+function getMultiSelect(page: PageObjectResponse, prop: string): string[] {
+  const p = page.properties[prop]
+  return p?.type === 'multi_select' ? p.multi_select.map((s) => s.name) : []
+}
+
 function getRelationId(page: PageObjectResponse, prop: string): string | null {
   const p = page.properties[prop]
   return p?.type === 'relation' ? (p.relation[0]?.id ?? null) : null
@@ -58,6 +68,12 @@ export function pageToProfile(page: PageObjectResponse): Profile {
     avatar_url: getUrl(page, 'avatar_url'),
     is_admin: getBool(page, 'is_admin'),
     created_at: page.created_time,
+    status: (getSelect(page, 'status') as MemberStatus) ?? null,
+    team: getSelect(page, 'team') ?? null,
+    role_title: getText(page, 'role_title') || null,
+    location: getText(page, 'location') || null,
+    skills: getMultiSelect(page, 'skills'),
+    fun_fact: getText(page, 'fun_fact') || null,
   }
 }
 
@@ -108,6 +124,8 @@ export async function getAllProfiles(filters?: {
   q?: string
   year?: number
   major?: string
+  status?: string
+  team?: string
 }): Promise<Profile[]> {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const conditions: any[] = []
@@ -120,6 +138,12 @@ export async function getAllProfiles(filters?: {
   }
   if (filters?.major) {
     conditions.push({ property: 'major', rich_text: { contains: filters.major } })
+  }
+  if (filters?.status) {
+    conditions.push({ property: 'status', select: { equals: filters.status } })
+  }
+  if (filters?.team) {
+    conditions.push({ property: 'team', select: { equals: filters.team } })
   }
 
   const res = await notion.databases.query({
@@ -174,19 +198,46 @@ export async function updateProfile(
     minor: string | null
     bio: string | null
     linkedin_url: string | null
+    status?: string | null
+    team?: string | null
+    role_title?: string | null
+    location?: string | null
+    skills?: string[]
+    fun_fact?: string | null
   }
 ): Promise<void> {
-  await notion.pages.update({
-    page_id: profileId,
-    properties: {
-      Name: { title: [{ text: { content: data.full_name } }] },
-      graduation_year: { number: data.graduation_year },
-      major: { rich_text: [{ text: { content: data.major ?? '' } }] },
-      minor: { rich_text: [{ text: { content: data.minor ?? '' } }] },
-      bio: { rich_text: [{ text: { content: data.bio ?? '' } }] },
-      linkedin_url: { url: data.linkedin_url },
-    },
-  })
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const properties: Record<string, any> = {
+    Name: { title: [{ text: { content: data.full_name } }] },
+    graduation_year: { number: data.graduation_year },
+    major: { rich_text: [{ text: { content: data.major ?? '' } }] },
+    minor: { rich_text: [{ text: { content: data.minor ?? '' } }] },
+    bio: { rich_text: [{ text: { content: data.bio ?? '' } }] },
+    linkedin_url: { url: data.linkedin_url },
+  }
+
+  if (data.role_title !== undefined) {
+    properties.role_title = { rich_text: [{ text: { content: data.role_title ?? '' } }] }
+  }
+  if (data.location !== undefined) {
+    properties.location = { rich_text: [{ text: { content: data.location ?? '' } }] }
+  }
+  if (data.fun_fact !== undefined) {
+    properties.fun_fact = { rich_text: [{ text: { content: data.fun_fact ?? '' } }] }
+  }
+  if (data.status !== undefined) {
+    properties.status = data.status ? { select: { name: data.status } } : { select: null }
+  }
+  if (data.team !== undefined) {
+    properties.team = data.team ? { select: { name: data.team } } : { select: null }
+  }
+  if (data.skills !== undefined) {
+    properties.skills = {
+      multi_select: data.skills.map((s) => ({ name: s })),
+    }
+  }
+
+  await notion.pages.update({ page_id: profileId, properties })
 }
 
 export async function syncInternships(

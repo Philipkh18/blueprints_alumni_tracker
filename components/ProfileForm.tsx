@@ -18,7 +18,9 @@ type Props = {
 type InternshipDraft = Omit<Internship, 'id' | 'profile_id'> & { id?: string }
 type ClubDraft = Omit<Club, 'id' | 'profile_id'> & { id?: string }
 
-export default function ProfileForm({ profile, internships, clubs }: Props) {
+const STATUS_OPTIONS = ['', 'Current Member', 'Alumni'] as const
+
+export default function ProfileForm({ profile, internships, clubs, isAdminEdit }: Props) {
   const router = useRouter()
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -29,6 +31,12 @@ export default function ProfileForm({ profile, internships, clubs }: Props) {
   const [minor, setMinor] = useState(profile.minor ?? '')
   const [bio, setBio] = useState(profile.bio ?? '')
   const [linkedin, setLinkedin] = useState(profile.linkedin_url ?? '')
+  const [status, setStatus] = useState(profile.status ?? '')
+  const [team, setTeam] = useState(profile.team ?? '')
+  const [roleTitle, setRoleTitle] = useState(profile.role_title ?? '')
+  const [location, setLocation] = useState(profile.location ?? '')
+  const [skillsRaw, setSkillsRaw] = useState(profile.skills.join(', '))
+  const [funFact, setFunFact] = useState(profile.fun_fact ?? '')
 
   const [internshipList, setInternshipList] = useState<InternshipDraft[]>(
     internships.map(({ id, profile_id, ...rest }) => ({ id, ...rest }))
@@ -85,6 +93,11 @@ export default function ProfileForm({ profile, internships, clubs }: Props) {
     setSaving(true)
     setError(null)
 
+    const skills = skillsRaw
+      .split(',')
+      .map((s) => s.trim())
+      .filter(Boolean)
+
     try {
       const res = await fetch(`/api/profiles/${profile.id}`, {
         method: 'PATCH',
@@ -97,6 +110,12 @@ export default function ProfileForm({ profile, internships, clubs }: Props) {
             minor: minor || null,
             bio: bio || null,
             linkedin_url: linkedin || null,
+            status: status || null,
+            team: team || null,
+            role_title: roleTitle || null,
+            location: location || null,
+            skills,
+            fun_fact: funFact || null,
           },
           internships: internshipList,
           clubs: clubList,
@@ -147,6 +166,24 @@ export default function ProfileForm({ profile, internships, clubs }: Props) {
             />
           </div>
           <div className="space-y-2">
+            <Label htmlFor="status">Member Status</Label>
+            <select
+              id="status"
+              value={status}
+              onChange={(e) => setStatus(e.target.value)}
+              className="h-8 w-full rounded-lg border border-input bg-transparent px-2.5 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+            >
+              {STATUS_OPTIONS.map((opt) => (
+                <option key={opt} value={opt}>
+                  {opt || 'Not set'}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-4">
+          <div className="space-y-2">
             <Label htmlFor="major">Major</Label>
             <Input
               id="major"
@@ -155,15 +192,45 @@ export default function ProfileForm({ profile, internships, clubs }: Props) {
               placeholder="e.g. Computer Science"
             />
           </div>
+          <div className="space-y-2">
+            <Label htmlFor="minor">Minor</Label>
+            <Input
+              id="minor"
+              value={minor}
+              onChange={(e) => setMinor(e.target.value)}
+              placeholder="Optional"
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <Label htmlFor="role_title">Role / Title</Label>
+            <Input
+              id="role_title"
+              value={roleTitle}
+              onChange={(e) => setRoleTitle(e.target.value)}
+              placeholder="e.g. VP of Engineering"
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="team">Team</Label>
+            <Input
+              id="team"
+              value={team}
+              onChange={(e) => setTeam(e.target.value)}
+              placeholder="e.g. Product"
+            />
+          </div>
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="minor">Minor</Label>
+          <Label htmlFor="location">Location</Label>
           <Input
-            id="minor"
-            value={minor}
-            onChange={(e) => setMinor(e.target.value)}
-            placeholder="Optional"
+            id="location"
+            value={location}
+            onChange={(e) => setLocation(e.target.value)}
+            placeholder="e.g. San Francisco, CA"
           />
         </div>
 
@@ -175,6 +242,27 @@ export default function ProfileForm({ profile, internships, clubs }: Props) {
             onChange={(e) => setBio(e.target.value)}
             rows={4}
             placeholder="Tell others about yourself..."
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="skills">Skills & Interests</Label>
+          <Input
+            id="skills"
+            value={skillsRaw}
+            onChange={(e) => setSkillsRaw(e.target.value)}
+            placeholder="Comma-separated, e.g. React, Python, Design"
+          />
+          <p className="text-[11px] text-muted-foreground">Separate with commas</p>
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="fun_fact">Fun Fact</Label>
+          <Input
+            id="fun_fact"
+            value={funFact}
+            onChange={(e) => setFunFact(e.target.value)}
+            placeholder="Something fun about you"
           />
         </div>
 
