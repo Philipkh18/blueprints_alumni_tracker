@@ -11,11 +11,12 @@ import {
   Globe,
   FileText,
   Star,
+  type LucideIcon,
 } from 'lucide-react'
 
 // Map Notion category names to Lucide icons.
 // Falls back to ExternalLink for anything not listed.
-const CATEGORY_ICONS: Record<string, React.ElementType> = {
+const CATEGORY_ICONS: Record<string, LucideIcon> = {
   Design: Palette,
   Engineering: Code2,
   Resources: BookOpen,
@@ -27,7 +28,7 @@ const CATEGORY_ICONS: Record<string, React.ElementType> = {
 }
 
 function LinkCard({ link }: { link: QuickLink }) {
-  const Icon = (link.category && CATEGORY_ICONS[link.category]) ?? ExternalLink
+  const Icon: LucideIcon = (link.category && CATEGORY_ICONS[link.category]) ?? ExternalLink
   return (
     <a
       href={link.url}
