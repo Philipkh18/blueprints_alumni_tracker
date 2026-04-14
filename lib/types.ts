@@ -35,3 +35,53 @@ export type ProfileWithDetails = Profile & {
   internships: Internship[]
   clubs: Club[]
 }
+
+// ─── Home page types ──────────────────────────────────────────────────────────
+
+export type Announcement = {
+  id: string
+  title: string
+  body: string
+  author: string
+  priority: 'high' | 'medium' | 'low'
+  tags: string[]
+  type: 'announcement' | 'update'
+  created_at: string
+  published: boolean
+}
+
+export type HomeEvent = {
+  id: string
+  title: string
+  description: string | null
+  date: string
+  end_date: string | null
+  location: string | null
+  event_type: string | null
+}
+
+export type QuickLink = {
+  id: string
+  label: string
+  url: string
+  category: string | null
+  icon: string | null
+}
+
+export type Idea = {
+  id: string
+  title: string
+  description: string | null
+  submitted_by: string
+  status: 'open' | 'under_review' | 'implemented' | 'closed'
+  created_at: string
+}
+
+export type OrgNeed = {
+  id: string
+  title: string
+  description: string | null
+  team: string | null
+  urgency: 'high' | 'medium' | 'low'
+  point_person: string | null
+}
