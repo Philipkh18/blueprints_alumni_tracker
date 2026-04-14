@@ -28,7 +28,7 @@ const CATEGORY_ICONS: Record<string, LucideIcon> = {
 }
 
 function LinkCard({ link }: { link: QuickLink }) {
-  const Icon: LucideIcon = (link.category && CATEGORY_ICONS[link.category]) ?? ExternalLink
+  const Icon: LucideIcon = (link.category ? CATEGORY_ICONS[link.category] : undefined) ?? ExternalLink
   return (
     <a
       href={link.url}
