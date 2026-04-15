@@ -70,11 +70,11 @@ export default async function EventsPage({
     const { timeMin, timeMax } = getThreeMonthWindow(currentMonth)
     events = filterPastEvents(await getCalendarEvents(timeMin, timeMax))
   } catch (error) {
-    console.error('Failed to load Google Calendar events for /events', {
+    console.error(`Failed to load Google Calendar events for /events ${JSON.stringify({
       currentMonth,
       configIssues,
       error: serializeCalendarError(error),
-    })
+    })}`)
     error = true
   }
 

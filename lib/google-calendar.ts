@@ -9,7 +9,7 @@ const REQUIRED_GOOGLE_CALENDAR_ENV_VARS = [
   'GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY',
 ] as const
 
-function normalizePrivateKey(value: string): string {
+function normalizeEnvString(value: string): string {
   let normalized = value.trim()
 
   // Vercel env values are sometimes pasted with surrounding quotes.
@@ -21,13 +21,17 @@ function normalizePrivateKey(value: string): string {
   }
 
   return normalized
+}
+
+function normalizePrivateKey(value: string): string {
+  return normalizeEnvString(value)
     .replace(/\r\n/g, '\n')
     .replace(/\\n/g, '\n')
 }
 
 function isMissingEnvValue(value: string | undefined): boolean {
   if (!value) return true
-  const normalized = value.trim()
+  const normalized = normalizeEnvString(value)
   return normalized.length === 0 || normalized === 'REPLACE_ME'
 }
 
@@ -87,13 +91,14 @@ async function getAccessToken(): Promise<string> {
   }
 
   const email = process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL!
+  const normalizedEmail = normalizeEnvString(email)
   const privateKey = normalizePrivateKey(process.env.GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY!)
 
   const now = Math.floor(Date.now() / 1000)
   const header = Buffer.from(JSON.stringify({ alg: 'RS256', typ: 'JWT' })).toString('base64url')
   const payload = Buffer.from(
     JSON.stringify({
-      iss: email,
+      iss: normalizedEmail,
       scope: 'https://www.googleapis.com/auth/calendar.readonly',
       aud: 'https://oauth2.googleapis.com/token',
       iat: now,
@@ -195,7 +200,7 @@ export async function getCalendarEvents(
   }
 
   const token = await getAccessToken()
-  const calendarId = process.env.GOOGLE_CALENDAR_ID!
+  const calendarId = normalizeEnvString(process.env.GOOGLE_CALENDAR_ID!)
 
   const url = new URL(
     `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(calendarId)}/events`

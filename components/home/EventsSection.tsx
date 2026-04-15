@@ -141,10 +141,10 @@ export default async function EventsSection() {
   try {
     events = await getUpcomingCalendarEvents()
   } catch (error) {
-    console.error('Failed to load Google Calendar events for home page', {
+    console.error(`Failed to load Google Calendar events for home page ${JSON.stringify({
       configIssues,
       error: serializeCalendarError(error),
-    })
+    })}`)
     error = true
   }
 
