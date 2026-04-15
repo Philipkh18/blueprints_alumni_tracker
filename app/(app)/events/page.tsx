@@ -3,6 +3,7 @@ import type { CalendarEvent } from '@/lib/types'
 import {
   isGoogleCalendarConfigured,
   getCalendarEvents,
+  getGoogleCalendarConfigIssues,
   getThreeMonthWindow,
 } from '@/lib/google-calendar'
 import EventsExplorer from '@/components/events/EventsExplorer'
@@ -36,6 +37,7 @@ export default async function EventsPage({
     monthParam && /^\d{4}-\d{2}$/.test(monthParam)
       ? monthParam
       : new Date().toISOString().slice(0, 7)
+  const configIssues = getGoogleCalendarConfigIssues()
 
   if (!isGoogleCalendarConfigured()) {
     return (
@@ -49,6 +51,11 @@ export default async function EventsPage({
           <p className="text-xs text-muted-foreground/60 mt-1">
             Events will appear here once the calendar integration is configured.
           </p>
+          {process.env.NODE_ENV !== 'production' && configIssues.length > 0 && (
+            <p className="mt-3 rounded-xl bg-secondary/60 px-3 py-2 font-mono text-[11px] text-muted-foreground">
+              {configIssues.join(' | ')}
+            </p>
+          )}
         </div>
       </div>
     )
@@ -60,7 +67,8 @@ export default async function EventsPage({
   try {
     const { timeMin, timeMax } = getThreeMonthWindow(currentMonth)
     events = await getCalendarEvents(timeMin, timeMax)
-  } catch {
+  } catch (error) {
+    console.error('Failed to load Google Calendar events for /events', error)
     error = true
   }
 

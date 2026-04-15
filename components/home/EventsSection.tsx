@@ -1,5 +1,6 @@
 import {
   isGoogleCalendarConfigured,
+  getGoogleCalendarConfigIssues,
   getUpcomingCalendarEvents,
 } from '@/lib/google-calendar'
 import type { CalendarEvent } from '@/lib/types'
@@ -101,6 +102,8 @@ function EventItem({ event }: { event: CalendarEvent }) {
 }
 
 export default async function EventsSection() {
+  const configIssues = getGoogleCalendarConfigIssues()
+
   if (!isGoogleCalendarConfigured()) {
     return (
       <Card className="h-full shadow-sm">
@@ -117,6 +120,11 @@ export default async function EventsSection() {
             <p className="text-sm text-muted-foreground">
               Events will appear here once Google Calendar is connected.
             </p>
+            {process.env.NODE_ENV !== 'production' && configIssues.length > 0 && (
+              <p className="mt-3 rounded-xl bg-secondary/60 px-3 py-2 font-mono text-[11px] text-muted-foreground">
+                {configIssues.join(' | ')}
+              </p>
+            )}
           </div>
         </CardContent>
       </Card>
@@ -128,7 +136,8 @@ export default async function EventsSection() {
 
   try {
     events = await getUpcomingCalendarEvents()
-  } catch {
+  } catch (error) {
+    console.error('Failed to load Google Calendar events for home page', error)
     error = true
   }
 

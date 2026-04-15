@@ -3,12 +3,39 @@ import type { CalendarEvent } from './types'
 
 // ─── Configuration check ──────────────────────────────────────────────────────
 
+const REQUIRED_GOOGLE_CALENDAR_ENV_VARS = [
+  'GOOGLE_CALENDAR_ID',
+  'GOOGLE_SERVICE_ACCOUNT_EMAIL',
+  'GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY',
+] as const
+
+function isMissingEnvValue(value: string | undefined): boolean {
+  if (!value) return true
+  const normalized = value.trim()
+  return normalized.length === 0 || normalized === 'REPLACE_ME'
+}
+
+export function getGoogleCalendarConfigIssues(): string[] {
+  return REQUIRED_GOOGLE_CALENDAR_ENV_VARS.flatMap((key) => {
+    const value = process.env[key]
+
+    if (isMissingEnvValue(value)) {
+      return [`Missing ${key}`]
+    }
+
+    if (
+      key === 'GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY' &&
+      !value!.replace(/\\n/g, '\n').includes('BEGIN PRIVATE KEY')
+    ) {
+      return ['GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY is not a valid PEM key']
+    }
+
+    return []
+  })
+}
+
 export function isGoogleCalendarConfigured(): boolean {
-  return !!(
-    process.env.GOOGLE_CALENDAR_ID &&
-    process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL &&
-    process.env.GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY
-  )
+  return getGoogleCalendarConfigIssues().length === 0
 }
 
 // ─── Token cache ──────────────────────────────────────────────────────────────
