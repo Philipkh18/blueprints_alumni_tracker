@@ -2,6 +2,7 @@ import {
   isGoogleCalendarConfigured,
   getGoogleCalendarConfigIssues,
   getUpcomingCalendarEvents,
+  serializeCalendarError,
 } from '@/lib/google-calendar'
 import type { CalendarEvent } from '@/lib/types'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
@@ -140,7 +141,10 @@ export default async function EventsSection() {
   try {
     events = await getUpcomingCalendarEvents()
   } catch (error) {
-    console.error('Failed to load Google Calendar events for home page', error)
+    console.error('Failed to load Google Calendar events for home page', {
+      configIssues,
+      error: serializeCalendarError(error),
+    })
     error = true
   }
 

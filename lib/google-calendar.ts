@@ -54,6 +54,29 @@ export function isGoogleCalendarConfigured(): boolean {
   return getGoogleCalendarConfigIssues().length === 0
 }
 
+export function serializeCalendarError(error: unknown): Record<string, unknown> {
+  if (error instanceof Error) {
+    const err = error as Error & {
+      code?: string
+      cause?: unknown
+      opensslErrorStack?: string[]
+      status?: number
+    }
+
+    return {
+      name: err.name,
+      message: err.message,
+      code: err.code,
+      status: err.status,
+      cause: err.cause,
+      opensslErrorStack: err.opensslErrorStack,
+      stack: err.stack,
+    }
+  }
+
+  return { value: error }
+}
+
 // ─── Token cache ──────────────────────────────────────────────────────────────
 
 let cachedToken: { token: string; expiry: number } | null = null

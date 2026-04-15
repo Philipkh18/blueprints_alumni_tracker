@@ -33,6 +33,7 @@ export default function ProfileForm({ profile, internships, clubs, isAdminEdit }
   const [major, setMajor] = useState(profile.major ?? '')
   const [minor, setMinor] = useState(profile.minor ?? '')
   const [bio, setBio] = useState(profile.bio ?? '')
+  const [phoneNumber, setPhoneNumber] = useState(profile.phone_number ?? '')
   const [linkedin, setLinkedin] = useState(profile.linkedin_url ?? '')
   const [status, setStatus] = useState(profile.status ?? '')
   const [team, setTeam] = useState(profile.team ?? '')
@@ -124,6 +125,7 @@ export default function ProfileForm({ profile, internships, clubs, isAdminEdit }
             major: major || null,
             minor: minor || null,
             bio: bio || null,
+            phone_number: phoneNumber || null,
             linkedin_url: linkedin || null,
             status: status || null,
             team: team || null,
@@ -285,6 +287,17 @@ export default function ProfileForm({ profile, internships, clubs, isAdminEdit }
             value={funFact}
             onChange={(e) => setFunFact(e.target.value)}
             placeholder="Something fun about you"
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="phone_number">Phone Number</Label>
+          <Input
+            id="phone_number"
+            type="tel"
+            value={phoneNumber}
+            onChange={(e) => setPhoneNumber(e.target.value)}
+            placeholder="e.g. (555) 123-4567"
           />
         </div>
 

@@ -16,6 +16,7 @@ import {
   MapPin,
   Briefcase,
   GraduationCap,
+  Phone,
   Linkedin,
   Pencil,
   ArrowLeft,
@@ -139,16 +140,26 @@ export default async function ProfilePage({ params }: { params: Promise<{ id: st
             )}
 
             {/* Contact links */}
-            {profile.linkedin_url && (
-              <a
-                href={profile.linkedin_url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:underline"
-              >
-                <Linkedin className="size-3.5" />
-                LinkedIn Profile
-              </a>
+            {(profile.phone_number || profile.linkedin_url) && (
+              <div className="flex flex-col items-start gap-2">
+                {profile.phone_number && (
+                  <div className="inline-flex items-center gap-1.5 text-sm font-medium text-foreground">
+                    <Phone className="size-3.5" />
+                    {profile.phone_number}
+                  </div>
+                )}
+                {profile.linkedin_url && (
+                  <a
+                    href={profile.linkedin_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:underline"
+                  >
+                    <Linkedin className="size-3.5" />
+                    LinkedIn Profile
+                  </a>
+                )}
+              </div>
             )}
           </div>
         </div>

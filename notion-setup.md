@@ -23,6 +23,7 @@ Create these as full-page databases in Notion. The property names must match exa
 | `major`         | Text     |                              |
 | `minor`         | Text     |                              |
 | `bio`           | Text     |                              |
+| `phone_number`  | Phone    | Optional contact number      |
 | `linkedin_url`  | URL      |                              |
 | `avatar_url`    | URL      |                              |
 | `banner_url`    | URL      | Profile header image         |

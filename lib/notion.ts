@@ -33,6 +33,11 @@ function getUrl(page: PageObjectResponse, prop: string): string | null {
   return p?.type === 'url' ? p.url : null
 }
 
+function getPhone(page: PageObjectResponse, prop: string): string | null {
+  const p = page.properties[prop]
+  return p?.type === 'phone_number' ? p.phone_number : null
+}
+
 function getDate(page: PageObjectResponse, prop: string): string | null {
   const p = page.properties[prop]
   return p?.type === 'date' ? (p.date?.start ?? null) : null
@@ -78,6 +83,7 @@ export function pageToProfile(page: PageObjectResponse): Profile {
     major: getText(page, 'major') || null,
     minor: getText(page, 'minor') || null,
     bio: getText(page, 'bio') || null,
+    phone_number: getPhone(page, 'phone_number'),
     linkedin_url: getUrl(page, 'linkedin_url'),
     github_url: getUrl(page, 'github_url'),
     instagram_url: getUrl(page, 'instagram_url'),
@@ -246,6 +252,7 @@ export async function updateProfile(
     major: string | null
     minor: string | null
     bio: string | null
+    phone_number?: string | null
     linkedin_url: string | null
     avatar_url?: string | null
     banner_url?: string | null
@@ -265,6 +272,10 @@ export async function updateProfile(
     minor: { rich_text: [{ text: { content: data.minor ?? '' } }] },
     bio: { rich_text: [{ text: { content: data.bio ?? '' } }] },
     linkedin_url: { url: data.linkedin_url },
+  }
+
+  if (data.phone_number !== undefined) {
+    properties.phone_number = { phone_number: data.phone_number }
   }
 
   if (data.avatar_url !== undefined) {
