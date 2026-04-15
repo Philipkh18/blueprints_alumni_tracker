@@ -204,12 +204,29 @@ export async function getCalendarEvents(
 
 // ─── Date helpers ─────────────────────────────────────────────────────────────
 
-/** Fetches upcoming events from now through the next 90 days. */
+function getEndOfWeek(date = new Date()): Date {
+  const endOfWeek = new Date(date)
+  const daysUntilSunday = (7 - endOfWeek.getDay()) % 7
+  endOfWeek.setDate(endOfWeek.getDate() + daysUntilSunday)
+  endOfWeek.setHours(23, 59, 59, 999)
+  return endOfWeek
+}
+
+function getEventEndTimestamp(event: CalendarEvent): number {
+  return Date.parse(event.end)
+}
+
+/** Fetches upcoming events from now through the end of the current week. */
 export async function getUpcomingCalendarEvents(limit = 6): Promise<CalendarEvent[]> {
   const timeMin = new Date().toISOString()
-  const timeMax = new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString()
+  const timeMax = getEndOfWeek().toISOString()
   const events = await getCalendarEvents(timeMin, timeMax)
   return events.slice(0, limit)
+}
+
+export function filterPastEvents(events: CalendarEvent[], now = new Date()): CalendarEvent[] {
+  const nowTimestamp = now.getTime()
+  return events.filter((event) => getEventEndTimestamp(event) >= nowTimestamp)
 }
 
 /** Returns ISO strings for a 3-month window centered on the given month (YYYY-MM). */

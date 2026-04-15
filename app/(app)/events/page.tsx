@@ -2,6 +2,7 @@ import { Calendar } from 'lucide-react'
 import type { CalendarEvent } from '@/lib/types'
 import {
   isGoogleCalendarConfigured,
+  filterPastEvents,
   getCalendarEvents,
   getGoogleCalendarConfigIssues,
   getThreeMonthWindow,
@@ -66,7 +67,7 @@ export default async function EventsPage({
 
   try {
     const { timeMin, timeMax } = getThreeMonthWindow(currentMonth)
-    events = await getCalendarEvents(timeMin, timeMax)
+    events = filterPastEvents(await getCalendarEvents(timeMin, timeMax))
   } catch (error) {
     console.error('Failed to load Google Calendar events for /events', error)
     error = true

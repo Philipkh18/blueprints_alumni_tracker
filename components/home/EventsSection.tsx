@@ -162,7 +162,7 @@ export default async function EventsSection() {
         ) : events.length === 0 ? (
           <div className="py-8 text-center">
             <Calendar className="mx-auto size-8 text-muted-foreground/30 mb-2" />
-            <p className="text-sm text-muted-foreground">No upcoming events scheduled.</p>
+            <p className="text-sm text-muted-foreground">No events scheduled for the rest of this week.</p>
           </div>
         ) : (
           <div className="space-y-2">
