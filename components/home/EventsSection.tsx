@@ -6,6 +6,7 @@ import {
 import type { CalendarEvent } from '@/lib/types'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import { connection } from 'next/server'
 import { Calendar, MapPin, Clock } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import Link from 'next/link'
@@ -102,6 +103,8 @@ function EventItem({ event }: { event: CalendarEvent }) {
 }
 
 export default async function EventsSection() {
+  await connection()
+
   const configIssues = getGoogleCalendarConfigIssues()
 
   if (!isGoogleCalendarConfigured()) {

@@ -9,6 +9,22 @@ const REQUIRED_GOOGLE_CALENDAR_ENV_VARS = [
   'GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY',
 ] as const
 
+function normalizePrivateKey(value: string): string {
+  let normalized = value.trim()
+
+  // Vercel env values are sometimes pasted with surrounding quotes.
+  if (
+    (normalized.startsWith('"') && normalized.endsWith('"')) ||
+    (normalized.startsWith("'") && normalized.endsWith("'"))
+  ) {
+    normalized = normalized.slice(1, -1)
+  }
+
+  return normalized
+    .replace(/\r\n/g, '\n')
+    .replace(/\\n/g, '\n')
+}
+
 function isMissingEnvValue(value: string | undefined): boolean {
   if (!value) return true
   const normalized = value.trim()
@@ -25,7 +41,7 @@ export function getGoogleCalendarConfigIssues(): string[] {
 
     if (
       key === 'GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY' &&
-      !value!.replace(/\\n/g, '\n').includes('BEGIN PRIVATE KEY')
+      !normalizePrivateKey(value!).includes('BEGIN PRIVATE KEY')
     ) {
       return ['GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY is not a valid PEM key']
     }
@@ -48,7 +64,7 @@ async function getAccessToken(): Promise<string> {
   }
 
   const email = process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL!
-  const privateKey = process.env.GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY!.replace(/\\n/g, '\n')
+  const privateKey = normalizePrivateKey(process.env.GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY!)
 
   const now = Math.floor(Date.now() / 1000)
   const header = Buffer.from(JSON.stringify({ alg: 'RS256', typ: 'JWT' })).toString('base64url')
