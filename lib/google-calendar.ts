@@ -161,6 +161,14 @@ export async function getCalendarEvents(
 
 // ─── Date helpers ─────────────────────────────────────────────────────────────
 
+/** Fetches upcoming events from now through the next 90 days. */
+export async function getUpcomingCalendarEvents(limit = 6): Promise<CalendarEvent[]> {
+  const timeMin = new Date().toISOString()
+  const timeMax = new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString()
+  const events = await getCalendarEvents(timeMin, timeMax)
+  return events.slice(0, limit)
+}
+
 /** Returns ISO strings for a 3-month window centered on the given month (YYYY-MM). */
 export function getThreeMonthWindow(monthStr: string): {
   timeMin: string

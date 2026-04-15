@@ -1,9 +1,17 @@
-import { getUpcomingEvents } from '@/lib/notion-home'
+import {
+  isGoogleCalendarConfigured,
+  getUpcomingCalendarEvents,
+} from '@/lib/google-calendar'
+import type { CalendarEvent } from '@/lib/types'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import type { HomeEvent } from '@/lib/types'
-import { Calendar, MapPin } from 'lucide-react'
+import { Calendar, MapPin, Clock } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import Link from 'next/link'
+
+function getDateOnly(dateStr: string): string {
+  return dateStr.includes('T') ? dateStr.split('T')[0] : dateStr
+}
 
 function formatEventDate(dateStr: string): { month: string; day: string; weekday: string } {
   const d = new Date(dateStr + 'T00:00:00')
@@ -12,6 +20,12 @@ function formatEventDate(dateStr: string): { month: string; day: string; weekday
     day: d.toLocaleDateString('en-US', { day: 'numeric' }),
     weekday: d.toLocaleDateString('en-US', { weekday: 'short' }),
   }
+}
+
+function formatTime(dateStr: string): string | null {
+  if (!dateStr.includes('T')) return null
+  const d = new Date(dateStr)
+  return d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })
 }
 
 function isToday(dateStr: string): boolean {
@@ -28,10 +42,12 @@ function dateLabel(dateStr: string): string | null {
   return null
 }
 
-function EventItem({ event }: { event: HomeEvent }) {
-  const { month, day, weekday } = formatEventDate(event.date)
-  const label = dateLabel(event.date)
-  const today = isToday(event.date)
+function EventItem({ event }: { event: CalendarEvent }) {
+  const date = getDateOnly(event.start)
+  const { month, day, weekday } = formatEventDate(date)
+  const label = dateLabel(date)
+  const today = isToday(date)
+  const time = formatTime(event.start)
 
   return (
     <div className="group flex gap-3 items-start transition-colors duration-150 rounded-lg p-1.5 -mx-1.5 hover:bg-accent/40">
@@ -60,28 +76,58 @@ function EventItem({ event }: { event: HomeEvent }) {
             </Badge>
           )}
         </div>
-        {event.event_type && (
+        {event.type && (
           <Badge variant="outline" className="text-[10px]">
-            {event.event_type}
+            {event.type}
           </Badge>
         )}
-        {event.location && (
-          <div className="flex items-center gap-1 text-[11px] text-muted-foreground">
-            <MapPin className="size-3" />
-            <span>{event.location}</span>
-          </div>
-        )}
+        <div className="flex items-center gap-3 text-[11px] text-muted-foreground">
+          {time && (
+            <span className="flex items-center gap-1">
+              <Clock className="size-3" />
+              {time}
+            </span>
+          )}
+          {event.location && (
+            <span className="flex items-center gap-1">
+              <MapPin className="size-3" />
+              {event.location}
+            </span>
+          )}
+        </div>
       </div>
     </div>
   )
 }
 
 export default async function EventsSection() {
-  let events: HomeEvent[] = []
+  if (!isGoogleCalendarConfigured()) {
+    return (
+      <Card className="h-full shadow-sm">
+        <CardHeader className="border-b">
+          <CardTitle className="flex items-center gap-2">
+            <Calendar className="size-4 text-primary" />
+            Upcoming Events
+          </CardTitle>
+          <CardDescription>What&apos;s on the calendar</CardDescription>
+        </CardHeader>
+        <CardContent className="pt-3">
+          <div className="py-8 text-center">
+            <Calendar className="mx-auto size-8 text-muted-foreground/30 mb-2" />
+            <p className="text-sm text-muted-foreground">
+              Events will appear here once Google Calendar is connected.
+            </p>
+          </div>
+        </CardContent>
+      </Card>
+    )
+  }
+
+  let events: CalendarEvent[] = []
   let error = false
 
   try {
-    events = await getUpcomingEvents()
+    events = await getUpcomingCalendarEvents()
   } catch {
     error = true
   }
@@ -111,6 +157,12 @@ export default async function EventsSection() {
             {events.map((event) => (
               <EventItem key={event.id} event={event} />
             ))}
+            <Link
+              href="/events"
+              className="block pt-2 text-center text-xs font-medium text-primary hover:underline"
+            >
+              View all events &rarr;
+            </Link>
           </div>
         )}
       </CardContent>

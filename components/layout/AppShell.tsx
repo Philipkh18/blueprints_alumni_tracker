@@ -17,7 +17,6 @@ import {
   PanelLeftClose,
   PanelLeft,
   Menu,
-  Search,
   Globe,
   X,
   User,
@@ -288,16 +287,6 @@ export default function AppShell({
                   {routeMeta.subtitle}
                 </span>
               </div>
-            </div>
-
-            {/* Search */}
-            <div className="relative hidden sm:flex items-center">
-              <Search className="absolute left-2.5 size-4 text-muted-foreground pointer-events-none" />
-              <input
-                type="text"
-                placeholder="Search alumni, teams, and resources"
-                className="h-10 w-60 lg:w-80 rounded-full border border-border bg-card/90 pl-9 pr-4 text-sm text-foreground placeholder:text-muted-foreground/70 outline-none transition-all duration-200 focus:w-84 focus:border-ring focus:bg-background focus:ring-2 focus:ring-ring/15"
-              />
             </div>
           </div>
 
