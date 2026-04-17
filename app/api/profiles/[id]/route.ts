@@ -30,11 +30,26 @@ export async function PATCH(
   const body = await req.json()
   const { profile: profileData, internships, clubs } = body
 
-  await Promise.all([
-    updateProfile(id, profileData),
-    syncInternships(id, internships ?? []),
-    syncClubs(id, clubs ?? []),
-  ])
+  if (profileData?.big_id === id) {
+    return NextResponse.json(
+      { error: 'A member cannot select themselves as their big.' },
+      { status: 400 }
+    )
+  }
+
+  try {
+    await Promise.all([
+      updateProfile(id, profileData),
+      syncInternships(id, internships ?? []),
+      syncClubs(id, clubs ?? []),
+    ])
+  } catch (error) {
+    console.error('Failed to update profile.', error)
+    return NextResponse.json(
+      { error: error instanceof Error ? error.message : 'Failed to update profile.' },
+      { status: 500 }
+    )
+  }
 
   return NextResponse.json({ success: true })
 }

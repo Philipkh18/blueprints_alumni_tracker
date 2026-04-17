@@ -27,6 +27,7 @@ Create these as full-page databases in Notion. The property names must match exa
 | `linkedin_url`  | URL      |                              |
 | `avatar_url`    | URL      |                              |
 | `banner_url`    | URL      | Profile header image         |
+| `big`           | Relation | Self-relation to Profiles DB |
 | `is_admin`      | Checkbox | Default: unchecked           |
 
 Copy the database ID → `NOTION_PROFILES_DB_ID`

@@ -58,6 +58,14 @@ function getRelationId(page: PageObjectResponse, prop: string): string | null {
   return p?.type === 'relation' ? (p.relation[0]?.id ?? null) : null
 }
 
+function getFirstRelationId(page: PageObjectResponse, props: string[]): string | null {
+  for (const prop of props) {
+    const relationId = getRelationId(page, prop)
+    if (relationId !== null) return relationId
+  }
+  return null
+}
+
 function getPageIconUrl(page: PageObjectResponse): string | null {
   if (!page.icon) return null
   if (page.icon.type === 'external') return page.icon.external.url
@@ -101,6 +109,7 @@ export function pageToProfile(page: PageObjectResponse): Profile {
     hobbies: getMultiSelect(page, 'hobbies'),
     current_classes: getMultiSelect(page, 'current_classes'),
     chapter_role: getText(page, 'chapter_role') || null,
+    big_id: getFirstRelationId(page, ['big', 'Big']),
     fun_fact: getText(page, 'fun_fact') || null,
   }
 }
@@ -182,18 +191,41 @@ export async function getAllProfiles(filters?: {
     conditions.push({ property: 'team', select: { equals: filters.team } })
   }
 
-  const res = await notion.databases.query({
-    database_id: PROFILES_DB,
-    filter:
-      conditions.length > 1
-        ? { and: conditions }
-        : conditions.length === 1
-          ? conditions[0]
-          : undefined,
-    sorts: [{ property: 'Name', direction: 'ascending' }],
-  })
+  const filter =
+    conditions.length > 1
+      ? { and: conditions }
+      : conditions.length === 1
+        ? conditions[0]
+        : undefined
 
-  return res.results.map((p) => pageToProfile(p as PageObjectResponse))
+  const pages: PageObjectResponse[] = []
+  let cursor: string | undefined
+
+  do {
+    const res = await notion.databases.query({
+      database_id: PROFILES_DB,
+      filter,
+      sorts: [{ property: 'Name', direction: 'ascending' }],
+      start_cursor: cursor,
+      page_size: 100,
+    })
+
+    pages.push(...(res.results as PageObjectResponse[]))
+    cursor = res.has_more ? (res.next_cursor ?? undefined) : undefined
+  } while (cursor)
+
+  return pages.map(pageToProfile)
+}
+
+async function getProfilesBigRelationProperty(): Promise<string | null> {
+  const database = await notion.databases.retrieve({ database_id: PROFILES_DB })
+  const properties = (database as { properties?: Record<string, unknown> }).properties ?? {}
+
+  for (const candidate of ['big', 'Big']) {
+    if (candidate in properties) return candidate
+  }
+
+  return null
 }
 
 export async function getInternshipsByProfileId(profileId: string): Promise<WorkExperience[]> {
@@ -261,9 +293,14 @@ export async function updateProfile(
     role_title?: string | null
     location?: string | null
     skills?: string[]
+    big_id?: string | null
     fun_fact?: string | null
   }
 ): Promise<void> {
+  if (data.big_id === profileId) {
+    throw new Error('A member cannot be their own big.')
+  }
+
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const properties: Record<string, any> = {
     Name: { title: [{ text: { content: data.full_name } }] },
@@ -302,6 +339,19 @@ export async function updateProfile(
   if (data.skills !== undefined) {
     properties.skills = {
       multi_select: data.skills.map((s) => ({ name: s })),
+    }
+  }
+  if (data.big_id !== undefined) {
+    const relationProperty = await getProfilesBigRelationProperty()
+
+    if (!relationProperty) {
+      if (data.big_id) {
+        throw new Error(
+          'Connections are not configured yet. Add a self-relation property named `big` to the Profiles Notion database.'
+        )
+      }
+    } else {
+      properties[relationProperty] = data.big_id ? { relation: [{ id: data.big_id }] } : { relation: [] }
     }
   }
 

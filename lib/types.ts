@@ -26,6 +26,7 @@ export type Profile = {
   hobbies: string[]
   current_classes: string[]
   chapter_role: string | null
+  big_id: string | null
   fun_fact: string | null
 }
 

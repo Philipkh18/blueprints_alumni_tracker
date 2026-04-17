@@ -5,6 +5,7 @@ import {
   createProfile,
   getProfileById,
   getProfileByClerkId,
+  getAllProfiles,
   getInternshipsByProfileId,
   getClubsByProfileId,
 } from '@/lib/notion'
@@ -82,8 +83,9 @@ export default async function EditProfilePage({
     )
   }
 
-  const [profile, internships, clubs, viewer] = await Promise.all([
+  const [profile, allProfiles, internships, clubs, viewer] = await Promise.all([
     getProfileById(profileId),
+    getAllProfiles(),
     getInternshipsByProfileId(profileId),
     getClubsByProfileId(profileId),
     getProfileByClerkId(userId),
@@ -100,6 +102,7 @@ export default async function EditProfilePage({
       <h1 className="text-2xl font-bold">Edit Profile</h1>
       <ProfileForm
         profile={profile}
+        allProfiles={allProfiles}
         internships={internships}
         clubs={clubs}
         isAdminEdit={isAdmin && !isOwner}

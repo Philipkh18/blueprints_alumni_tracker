@@ -12,6 +12,7 @@ import ProfileMediaEditor from '@/components/profile/ProfileMediaEditor'
 
 type Props = {
   profile: Profile
+  allProfiles: Profile[]
   internships: Internship[]
   clubs: Club[]
   isAdminEdit?: boolean
@@ -23,7 +24,7 @@ type ClubDraft = Omit<Club, 'id' | 'profile_id'> & { id?: string }
 const STATUS_OPTIONS = ['', 'Current Member', 'Alumni'] as const
 const EMPLOYMENT_TYPE_OPTIONS = ['', 'Internship', 'Full-Time', 'Part-Time', 'Contract'] as const
 
-export default function ProfileForm({ profile, internships, clubs, isAdminEdit }: Props) {
+export default function ProfileForm({ profile, allProfiles, internships, clubs, isAdminEdit }: Props) {
   const router = useRouter()
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -40,6 +41,7 @@ export default function ProfileForm({ profile, internships, clubs, isAdminEdit }
   const [roleTitle, setRoleTitle] = useState(profile.role_title ?? '')
   const [location, setLocation] = useState(profile.location ?? '')
   const [skillsRaw, setSkillsRaw] = useState(profile.skills.join(', '))
+  const [bigId, setBigId] = useState(profile.big_id ?? '')
   const [funFact, setFunFact] = useState(profile.fun_fact ?? '')
 
   const [internshipList, setInternshipList] = useState<InternshipDraft[]>(
@@ -48,6 +50,9 @@ export default function ProfileForm({ profile, internships, clubs, isAdminEdit }
   const [clubList, setClubList] = useState<ClubDraft[]>(
     clubs.map(({ id, profile_id, ...rest }) => ({ id, ...rest }))
   )
+  const bigOptions = allProfiles
+    .filter((candidate) => candidate.id !== profile.id)
+    .sort((a, b) => a.full_name.localeCompare(b.full_name))
 
   function addInternship() {
     setInternshipList((prev) => [
@@ -132,6 +137,7 @@ export default function ProfileForm({ profile, internships, clubs, isAdminEdit }
             role_title: roleTitle || null,
             location: location || null,
             skills,
+            big_id: bigId || null,
             fun_fact: funFact || null,
           },
           internships: normalizedInternships,
@@ -278,6 +284,27 @@ export default function ProfileForm({ profile, internships, clubs, isAdminEdit }
             placeholder="Comma-separated, e.g. React, Python, Design"
           />
           <p className="text-[11px] text-muted-foreground">Separate with commas</p>
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="big_id">Big / Mentor</Label>
+          <select
+            id="big_id"
+            value={bigId}
+            onChange={(e) => setBigId(e.target.value)}
+            className="h-8 w-full rounded-lg border border-input bg-transparent px-2.5 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+          >
+            <option value="">No big selected</option>
+            {bigOptions.map((candidate) => (
+              <option key={candidate.id} value={candidate.id}>
+                {candidate.full_name}
+              </option>
+            ))}
+          </select>
+          <p className="text-[11px] text-muted-foreground">
+            Pick the person who mentored you or brought you into the org. The Connections page
+            uses this to build mentor and mentee trees automatically.
+          </p>
         </div>
 
         <div className="space-y-2">
