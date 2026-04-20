@@ -51,11 +51,10 @@ export default function HomePage() {
 
             <div className="space-y-4">
               <h1 className="max-w-4xl text-5xl font-semibold tracking-[-0.04em] text-balance text-foreground sm:text-6xl lg:text-7xl">
-                Blueprints for Pangaea Database.
+                Blueprints for Pangaea Dashboard.
               </h1>
               <p className="max-w-2xl text-lg leading-relaxed tracking-[-0.01em] text-muted-foreground sm:text-xl">
-                Profiles, updates, events, and team needs in one calm interface
-                with a more restrained, Apple-like visual system.
+                Profiles, updates, events, and team needs all in one place.
               </p>
             </div>
 

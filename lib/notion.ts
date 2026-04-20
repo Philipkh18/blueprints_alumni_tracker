@@ -1,12 +1,14 @@
 import { Client } from '@notionhq/client'
 import type { PageObjectResponse } from '@notionhq/client/build/src/api-endpoints'
-import type { Profile, MemberStatus, WorkExperience, EmploymentType, Club } from './types'
+import type { Profile, MemberStatus, WorkExperience, EmploymentType, Club, FamilyTree } from './types'
+import { normalizeTeamName } from './teams'
 
 export const notion = new Client({ auth: process.env.NOTION_TOKEN })
 
 const PROFILES_DB = process.env.NOTION_PROFILES_DB_ID!
 const INTERNSHIPS_DB = process.env.NOTION_INTERNSHIPS_DB_ID!
 const CLUBS_DB = process.env.NOTION_CLUBS_DB_ID!
+const FAMILY_TREES_DB = process.env.NOTION_FAMILY_TREES_DB_ID!
 
 // ─── Property helpers ────────────────────────────────────────────────────────
 
@@ -46,6 +48,22 @@ function getDate(page: PageObjectResponse, prop: string): string | null {
 function getSelect(page: PageObjectResponse, prop: string): string | null {
   const p = page.properties[prop]
   return p?.type === 'select' ? (p.select?.name ?? null) : null
+}
+
+// Reads a list property, tolerating legacy `select` data so a Profiles DB
+// partway through the schema migration still loads.
+function getTeams(page: PageObjectResponse, prop: string): string[] {
+  const p = page.properties[prop]
+  const rawValues =
+    !p
+      ? []
+      : p.type === 'multi_select'
+        ? p.multi_select.map((s) => s.name)
+        : p.type === 'select'
+          ? (p.select ? [p.select.name] : [])
+          : []
+
+  return [...new Set(rawValues.map((name) => normalizeTeamName(name)).filter(Boolean) as string[])]
 }
 
 function getMultiSelect(page: PageObjectResponse, prop: string): string[] {
@@ -101,7 +119,7 @@ export function pageToProfile(page: PageObjectResponse): Profile {
     is_admin: getBool(page, 'is_admin'),
     created_at: page.created_time,
     status: (getSelect(page, 'status') as MemberStatus) ?? null,
-    team: getSelect(page, 'team') ?? null,
+    team: getTeams(page, 'team'),
     role_title: getText(page, 'role_title') || null,
     location: getText(page, 'location') || null,
     hometown: getText(page, 'hometown') || null,
@@ -110,7 +128,15 @@ export function pageToProfile(page: PageObjectResponse): Profile {
     current_classes: getMultiSelect(page, 'current_classes'),
     chapter_role: getText(page, 'chapter_role') || null,
     big_id: getFirstRelationId(page, ['big', 'Big']),
+    family_tree_id: getFirstRelationId(page, ['family_tree', 'Family Tree']),
     fun_fact: getText(page, 'fun_fact') || null,
+  }
+}
+
+export function pageToFamilyTree(page: PageObjectResponse): FamilyTree {
+  return {
+    id: page.id,
+    name: getText(page, 'Name'),
   }
 }
 
@@ -188,7 +214,12 @@ export async function getAllProfiles(filters?: {
     conditions.push({ property: 'status', select: { equals: filters.status } })
   }
   if (filters?.team) {
-    conditions.push({ property: 'team', select: { equals: filters.team } })
+    const teamPropertyType = await getProfilesTeamPropertyType()
+    conditions.push(
+      teamPropertyType === 'multi_select'
+        ? { property: 'team', multi_select: { contains: filters.team } }
+        : { property: 'team', select: { equals: filters.team } }
+    )
   }
 
   const filter =
@@ -226,6 +257,45 @@ async function getProfilesBigRelationProperty(): Promise<string | null> {
   }
 
   return null
+}
+
+async function getProfilesTeamPropertyType(): Promise<'select' | 'multi_select'> {
+  const database = await notion.databases.retrieve({ database_id: PROFILES_DB })
+  const properties =
+    (database as { properties?: Record<string, { type?: string }> }).properties ?? {}
+  const teamProperty = properties.team
+
+  return teamProperty?.type === 'multi_select' ? 'multi_select' : 'select'
+}
+
+async function getProfilesFamilyTreeRelationProperty(): Promise<string | null> {
+  const database = await notion.databases.retrieve({ database_id: PROFILES_DB })
+  const properties = (database as { properties?: Record<string, unknown> }).properties ?? {}
+
+  for (const candidate of ['family_tree', 'Family Tree']) {
+    if (candidate in properties) return candidate
+  }
+
+  return null
+}
+
+export async function getAllFamilyTrees(): Promise<FamilyTree[]> {
+  const pages: PageObjectResponse[] = []
+  let cursor: string | undefined
+
+  do {
+    const res = await notion.databases.query({
+      database_id: FAMILY_TREES_DB,
+      start_cursor: cursor,
+      page_size: 100,
+      sorts: [{ property: 'Name', direction: 'ascending' }],
+    })
+
+    pages.push(...(res.results as PageObjectResponse[]))
+    cursor = res.has_more ? (res.next_cursor ?? undefined) : undefined
+  } while (cursor)
+
+  return pages.map(pageToFamilyTree)
 }
 
 export async function getInternshipsByProfileId(profileId: string): Promise<WorkExperience[]> {
@@ -289,7 +359,7 @@ export async function updateProfile(
     avatar_url?: string | null
     banner_url?: string | null
     status?: string | null
-    team?: string | null
+    team?: string[] | null
     role_title?: string | null
     location?: string | null
     skills?: string[]
@@ -334,7 +404,22 @@ export async function updateProfile(
     properties.status = data.status ? { select: { name: data.status } } : { select: null }
   }
   if (data.team !== undefined) {
-    properties.team = data.team ? { select: { name: data.team } } : { select: null }
+    const teamPropertyType = await getProfilesTeamPropertyType()
+    const selectedTeams = data.team ?? []
+
+    properties.team =
+      teamPropertyType === 'multi_select'
+        ? { multi_select: selectedTeams.map((name) => ({ name })) }
+        : (() => {
+            if (selectedTeams.length > 1) {
+              throw new Error(
+                'The Profiles `team` property in Notion is still a single-select field, so multiple teams cannot be saved yet.'
+              )
+            }
+
+            const selectedTeam = selectedTeams[0] ?? null
+            return { select: selectedTeam ? { name: selectedTeam } : null }
+          })()
   }
   if (data.skills !== undefined) {
     properties.skills = {
@@ -356,6 +441,53 @@ export async function updateProfile(
   }
 
   await notion.pages.update({ page_id: profileId, properties })
+}
+
+export async function createFamilyTree(name: string): Promise<FamilyTree> {
+  const page = await notion.pages.create({
+    parent: { database_id: FAMILY_TREES_DB },
+    properties: {
+      Name: { title: [{ text: { content: name } }] },
+    },
+  })
+
+  return pageToFamilyTree(page as PageObjectResponse)
+}
+
+export async function updateFamilyTreeName(
+  familyTreeId: string,
+  name: string
+): Promise<void> {
+  await notion.pages.update({
+    page_id: familyTreeId,
+    properties: {
+      Name: { title: [{ text: { content: name } }] },
+    },
+  })
+}
+
+export async function assignFamilyTreeToProfiles(
+  profileIds: string[],
+  familyTreeId: string
+): Promise<void> {
+  const relationProperty = await getProfilesFamilyTreeRelationProperty()
+
+  if (!relationProperty) {
+    throw new Error(
+      'Connections are not configured yet. Add a relation property named `family_tree` to the Profiles Notion database.'
+    )
+  }
+
+  await Promise.all(
+    profileIds.map((profileId) =>
+      notion.pages.update({
+        page_id: profileId,
+        properties: {
+          [relationProperty]: { relation: [{ id: familyTreeId }] },
+        },
+      })
+    )
+  )
 }
 
 export async function syncInternships(

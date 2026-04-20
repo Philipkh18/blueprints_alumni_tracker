@@ -1,35 +1,42 @@
-import Link from 'next/link'
-import ConnectionsExplorer from '@/components/connections/ConnectionsExplorer'
-import { getAllProfiles } from '@/lib/notion'
+import { auth } from "@clerk/nextjs/server";
+import ConnectionsExplorer from "@/components/connections/ConnectionsExplorer";
+import {
+  getAllFamilyTrees,
+  getAllProfiles,
+  getProfileByClerkId,
+} from "@/lib/notion";
 
-export const dynamic = 'force-dynamic'
+export const dynamic = "force-dynamic";
 
 export default async function ConnectionsPage() {
-  const profiles = await getAllProfiles()
+  const { userId } = await auth();
+  const [profiles, familyTrees, viewer] = await Promise.all([
+    getAllProfiles(),
+    getAllFamilyTrees(),
+    userId ? getProfileByClerkId(userId) : Promise.resolve(null),
+  ]);
 
   return (
-    <div className="space-y-6 animate-fade-up">
-      <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-        <div className="space-y-2">
-          <p className="text-xs font-semibold uppercase tracking-[0.3em] text-muted-foreground">
-            Connections
-          </p>
-          <h1 className="text-3xl font-semibold tracking-tight">Mentor and mentee families</h1>
-          <p className="max-w-2xl text-sm leading-relaxed text-muted-foreground">
-            This page maps the big-little lines that hold institutional memory together across the
-            alumni network.
-          </p>
-        </div>
-
-        <Link
-          href="/profile/edit"
-          className="inline-flex h-10 items-center justify-center rounded-full border border-border bg-white/70 px-5 text-sm font-medium text-foreground transition-colors hover:bg-white"
-        >
-          Update my connections
-        </Link>
+    <div className="mx-auto max-w-5xl space-y-6 animate-fade-up">
+      <div className="brand-panel rounded-[2rem] px-6 py-7 sm:px-8">
+        <p className="text-xs font-semibold uppercase tracking-[0.3em] text-muted-foreground">
+          Connections
+        </p>
+        <h1 className="mt-2 text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
+          Mentor-Mentee Trees
+        </h1>
+        <p className="mt-2 max-w-2xl text-sm leading-relaxed text-muted-foreground">
+          Explore mentor-mentee lineage across the Blueprints network. Tap a
+          person&apos;s icon or name to jump to their profile.
+        </p>
       </div>
 
-      <ConnectionsExplorer profiles={profiles} />
+      <ConnectionsExplorer
+        profiles={profiles}
+        familyTrees={familyTrees}
+        currentUserProfileId={viewer?.id ?? null}
+        isAdmin={viewer?.is_admin ?? false}
+      />
     </div>
-  )
+  );
 }

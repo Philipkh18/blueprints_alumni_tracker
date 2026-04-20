@@ -33,7 +33,7 @@ export default function MemberDirectory({ profiles }: Props) {
     [profiles]
   )
   const teams = useMemo(
-    () => [...new Set(profiles.map((p) => p.team).filter(Boolean))].sort() as string[],
+    () => [...new Set(profiles.flatMap((p) => p.team))].sort(),
     [profiles]
   )
 
@@ -44,7 +44,7 @@ export default function MemberDirectory({ profiles }: Props) {
       if (year && p.graduation_year !== parseInt(year)) return false
       if (major && p.major !== major) return false
       if (status && p.status !== status) return false
-      if (team && p.team !== team) return false
+      if (team && !p.team.includes(team)) return false
       return true
     })
   }, [profiles, q, year, major, status, team])

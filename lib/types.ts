@@ -18,7 +18,7 @@ export type Profile = {
   is_admin: boolean
   created_at: string
   status: MemberStatus | null
-  team: string | null
+  team: string[]
   role_title: string | null
   location: string | null
   hometown: string | null
@@ -27,7 +27,13 @@ export type Profile = {
   current_classes: string[]
   chapter_role: string | null
   big_id: string | null
+  family_tree_id: string | null
   fun_fact: string | null
+}
+
+export type FamilyTree = {
+  id: string
+  name: string
 }
 
 export type EmploymentType = 'Internship' | 'Full-Time' | 'Part-Time' | 'Contract'
@@ -112,6 +118,22 @@ export type OrgNeed = {
   team: string | null
   urgency: 'high' | 'medium' | 'low'
   point_person: string | null
+}
+
+// ─── Teams page types ─────────────────────────────────────────────────────────
+
+export type TeamUpdateStatus = 'In Progress' | 'Milestone' | 'Blocker' | 'Done'
+
+export type TeamUpdate = {
+  id: string
+  title: string
+  body: string | null
+  team: string | null
+  author: string | null
+  date: string | null
+  tags: string[]
+  status: TeamUpdateStatus | null
+  published: boolean
 }
 
 // ─── Events page types ────────────────────────────────────────────────────────

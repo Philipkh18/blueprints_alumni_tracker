@@ -7,7 +7,7 @@
 3. Name it "Alumni Tracker", select your workspace
 4. Copy the **Internal Integration Secret** → `NOTION_TOKEN` in `.env.local`
 
-## 2. Create Three Databases
+## 2. Create Four Databases
 
 Create these as full-page databases in Notion. The property names must match exactly.
 
@@ -24,10 +24,14 @@ Create these as full-page databases in Notion. The property names must match exa
 | `minor`         | Text     |                              |
 | `bio`           | Text     |                              |
 | `phone_number`  | Phone    | Optional contact number      |
+| `role_title`    | Text     | e.g. VP of Engineering       |
+| `status`        | Select   | `Current Member`, `Alumni`   |
+| `team`          | Multi-select | Options must match the 7 teams in `lib/teams.ts`: `Operations`, `Technology`, `Development`, `Expansion`, `Finance`, `Internal`, `New Analysts`. Members can be on multiple. |
 | `linkedin_url`  | URL      |                              |
 | `avatar_url`    | URL      |                              |
 | `banner_url`    | URL      | Profile header image         |
 | `big`           | Relation | Self-relation to Profiles DB |
+| `family_tree`   | Relation | Points to Family Trees DB    |
 | `is_admin`      | Checkbox | Default: unchecked           |
 
 Copy the database ID → `NOTION_PROFILES_DB_ID`
@@ -64,9 +68,40 @@ Copy the database ID → `NOTION_CLUBS_DB_ID`
 
 ---
 
+### Family Trees Database
+
+| Property Name | Type  | Notes                       |
+|---------------|-------|-----------------------------|
+| `Name`        | Title | Stable name for a tree/line |
+
+Copy the database ID → `NOTION_FAMILY_TREES_DB_ID`
+
+---
+
+### Team Updates Database
+
+Powers the Teams page. Each row is one update attached to one team.
+
+| Property Name | Type         | Notes                                                                                   |
+|---------------|--------------|-----------------------------------------------------------------------------------------|
+| `Name`        | Title        | Short update title (e.g. "Spring socials recap")                                        |
+| `team`        | Select       | Must match one of: `Operations`, `Technology`, `Development`, `Expansion`, `Finance`, `Internal`, `New Analysts` — character-for-character, same set used on the Profiles `team` select |
+| `body`        | Text         | Update detail / context                                                                 |
+| `author`      | Text         | Author's name (free text)                                                               |
+| `date`        | Date         | When the update happened (falls back to created time if blank)                          |
+| `tags`        | Multi-select | Free-form labels (e.g. `Launch`, `Onboarding`, `Chapter`)                               |
+| `status`      | Select       | One of: `In Progress`, `Milestone`, `Blocker`, `Done`                                   |
+| `published`   | Checkbox     | Only checked rows appear on the Teams page                                              |
+
+Copy the database ID → `NOTION_TEAM_UPDATES_DB_ID`
+
+> The seven team names are fixed in `lib/teams.ts`. Keep the `team` select options in the Profiles and Team Updates databases in sync with that list.
+
+---
+
 ## 3. Share Databases with Your Integration
 
-For each of the three databases:
+For each of the four databases:
 1. Open the database → click **...** menu (top right)
 2. Click **Connections** → search for your integration → **Confirm**
 

@@ -9,6 +9,9 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { normalizeUrlInput } from '@/lib/company-brand'
 import ProfileMediaEditor from '@/components/profile/ProfileMediaEditor'
+import { PROFILE_TEAM_OPTIONS } from '@/lib/teams'
+import { cn } from '@/lib/utils'
+import { Check } from 'lucide-react'
 
 type Props = {
   profile: Profile
@@ -37,7 +40,7 @@ export default function ProfileForm({ profile, allProfiles, internships, clubs, 
   const [phoneNumber, setPhoneNumber] = useState(profile.phone_number ?? '')
   const [linkedin, setLinkedin] = useState(profile.linkedin_url ?? '')
   const [status, setStatus] = useState(profile.status ?? '')
-  const [team, setTeam] = useState(profile.team ?? '')
+  const [teams, setTeams] = useState(profile.team)
   const [roleTitle, setRoleTitle] = useState(profile.role_title ?? '')
   const [location, setLocation] = useState(profile.location ?? '')
   const [skillsRaw, setSkillsRaw] = useState(profile.skills.join(', '))
@@ -133,7 +136,7 @@ export default function ProfileForm({ profile, allProfiles, internships, clubs, 
             phone_number: phoneNumber || null,
             linkedin_url: linkedin || null,
             status: status || null,
-            team: team || null,
+            team: teams,
             role_title: roleTitle || null,
             location: location || null,
             skills,
@@ -226,25 +229,47 @@ export default function ProfileForm({ profile, allProfiles, internships, clubs, 
           </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <Label htmlFor="role_title">Role / Title</Label>
-            <Input
-              id="role_title"
-              value={roleTitle}
-              onChange={(e) => setRoleTitle(e.target.value)}
-              placeholder="e.g. VP of Engineering"
-            />
+        <div className="space-y-2">
+          <Label htmlFor="role_title">Role / Title</Label>
+          <Input
+            id="role_title"
+            value={roleTitle}
+            onChange={(e) => setRoleTitle(e.target.value)}
+            placeholder="e.g. VP of Engineering"
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Label>Departments</Label>
+          <div className="flex flex-wrap gap-2">
+            {PROFILE_TEAM_OPTIONS.map((option) => {
+              const active = teams.includes(option)
+              return (
+                <button
+                  key={option}
+                  type="button"
+                  onClick={() =>
+                    setTeams((prev) =>
+                      active ? prev.filter((value) => value !== option) : [...prev, option]
+                    )
+                  }
+                  aria-pressed={active}
+                  className={cn(
+                    'inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition-all duration-150',
+                    active
+                      ? 'bg-[linear-gradient(135deg,var(--color-brand-ocean),var(--color-brand-bright))] text-primary-foreground shadow-[0_4px_12px_oklch(0.5_0.18_257/0.2)]'
+                      : 'brand-chip text-muted-foreground hover:text-foreground'
+                  )}
+                >
+                  {active && <Check className="size-3" />}
+                  {option}
+                </button>
+              )
+            })}
           </div>
-          <div className="space-y-2">
-            <Label htmlFor="team">Team</Label>
-            <Input
-              id="team"
-              value={team}
-              onChange={(e) => setTeam(e.target.value)}
-              placeholder="e.g. Product"
-            />
-          </div>
+          <p className="text-[11px] text-muted-foreground">
+            Members can belong to multiple teams. These selections drive the Teams page and member filters.
+          </p>
         </div>
 
         <div className="space-y-2">

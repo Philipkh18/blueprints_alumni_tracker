@@ -228,19 +228,6 @@ export default function AppShell({
           )}
         </nav>
 
-        {!collapsed && (
-          <div className="relative z-10 px-3 pb-3">
-            <div className="rounded-[1.5rem] border border-border bg-white/60 p-4">
-              <p className="text-sm font-medium text-foreground">
-                Blueprints for Pangaea
-              </p>
-              <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
-                A quieter interface for alumni context, events, and live team requests.
-              </p>
-            </div>
-          </div>
-        )}
-
         {/* Collapse toggle — desktop only */}
         <div className="relative z-10 hidden border-t border-sidebar-border p-2 lg:flex">
           <button

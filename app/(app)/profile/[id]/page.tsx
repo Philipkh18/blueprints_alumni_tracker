@@ -85,11 +85,11 @@ export default async function ProfilePage({ params }: { params: Promise<{ id: st
           <div className="mt-4 space-y-3">
             <div>
               <h1 className="text-2xl font-semibold tracking-tight">{profile.full_name}</h1>
-              {(profile.role_title || profile.team) && (
+              {(profile.role_title || profile.team.length > 0) && (
                 <p className="text-sm text-muted-foreground">
                   {profile.role_title}
-                  {profile.role_title && profile.team && ' · '}
-                  {profile.team}
+                  {profile.role_title && profile.team.length > 0 && ' · '}
+                  {profile.team.join(' · ')}
                 </p>
               )}
             </div>
@@ -212,7 +212,12 @@ export default async function ProfilePage({ params }: { params: Promise<{ id: st
             {profile.graduation_year && (
               <InfoRow label="Class" value={String(profile.graduation_year)} />
             )}
-            {profile.team && <InfoRow label="Team" value={profile.team} />}
+            {profile.team.length > 0 && (
+              <InfoRow
+                label={profile.team.length > 1 ? 'Teams' : 'Team'}
+                value={profile.team.join(', ')}
+              />
+            )}
             {profile.location && <InfoRow label="Location" value={profile.location} />}
           </div>
         </div>

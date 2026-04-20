@@ -45,13 +45,13 @@ export default function MemberCard({ profile }: { profile: Profile }) {
         </div>
 
         {/* Role / Team */}
-        {(profile.role_title || profile.team) && (
+        {(profile.role_title || profile.team.length > 0) && (
           <div className="flex items-center gap-1 text-[11px] text-muted-foreground">
             <Briefcase className="size-3 shrink-0" />
             <span className="truncate">
               {profile.role_title}
-              {profile.role_title && profile.team && ' · '}
-              {profile.team}
+              {profile.role_title && profile.team.length > 0 && ' · '}
+              {profile.team.join(' · ')}
             </span>
           </div>
         )}
