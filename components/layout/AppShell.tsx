@@ -20,7 +20,15 @@ import {
   Globe,
   X,
   User,
+  TrendingUp,
+  Eye,
+  ExternalLink,
 } from 'lucide-react'
+
+const EXTERNAL_APPS = [
+  { href: 'https://b4p-quantitative.vercel.app/', label: 'Quant Hub', icon: TrendingUp },
+  { href: 'https://b4p-external-view-w26.vercel.app/', label: 'External View', icon: Eye },
+]
 
 const NAV_ITEMS = [
   { href: '/home', label: 'Home', icon: Home },
@@ -190,6 +198,38 @@ export default function AppShell({
                   {item.label}
                 </span>
               </Link>
+            )
+          })}
+
+          <div className={cn('my-3 border-t border-sidebar-border', collapsed ? 'mx-3' : 'mx-2')} />
+          <p
+            className={cn(
+              'mb-2 px-4 text-[11px] font-medium text-muted-foreground transition-opacity',
+              collapsed && 'lg:opacity-0'
+            )}
+          >
+            Apps
+          </p>
+          {EXTERNAL_APPS.map((app) => {
+            const Icon = app.icon
+            return (
+              <a
+                key={app.href}
+                href={app.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={cn(
+                  'group relative flex h-11 items-center gap-3 rounded-2xl px-4 text-[15px] font-medium transition-all duration-150',
+                  'bg-[linear-gradient(135deg,oklch(0.54_0.12_252/0.08),oklch(0.64_0.16_252/0.06))] text-[oklch(0.44_0.10_252)] hover:bg-[linear-gradient(135deg,oklch(0.54_0.12_252/0.14),oklch(0.64_0.16_252/0.10))] hover:text-[oklch(0.34_0.10_252)]',
+                  collapsed && 'lg:justify-center lg:px-0'
+                )}
+              >
+                <Icon className="size-4 shrink-0" />
+                <span className={cn('transition-opacity', collapsed && 'lg:hidden')}>
+                  {app.label}
+                </span>
+                <ExternalLink className={cn('ml-auto size-3 opacity-50 transition-opacity group-hover:opacity-100', collapsed && 'lg:hidden')} />
+              </a>
             )
           })}
 

@@ -1,9 +1,23 @@
 import { Client } from '@notionhq/client'
+import { unstable_cache, revalidateTag } from 'next/cache'
 import type { PageObjectResponse } from '@notionhq/client/build/src/api-endpoints'
 import type { Profile, MemberStatus, WorkExperience, EmploymentType, Club, FamilyTree } from './types'
 import { normalizeTeamName } from './teams'
 
 export const notion = new Client({ auth: process.env.NOTION_TOKEN })
+
+// ─── Cache tags ──────────────────────────────────────────────────────────────
+// The heavy, network-bound reads below are wrapped in `unstable_cache` so repeat
+// navigations reuse a result instead of re-hitting Notion. Mutations call
+// `revalidateTag` so edits made through the app appear immediately; the 60s TTL
+// is the backstop for edits made directly in Notion (the source of truth).
+export const CACHE_TAGS = {
+  profiles: 'profiles',
+  workExperiences: 'work-experiences',
+  familyTrees: 'family-trees',
+} as const
+
+const CACHE_TTL_SECONDS = 60
 
 const PROFILES_DB = process.env.NOTION_PROFILES_DB_ID!
 const INTERNSHIPS_DB = process.env.NOTION_INTERNSHIPS_DB_ID!
@@ -173,14 +187,21 @@ export function pageToClub(page: PageObjectResponse): Club {
 
 // ─── Query helpers ───────────────────────────────────────────────────────────
 
-export async function getProfileByClerkId(clerkId: string): Promise<Profile | null> {
-  const res = await notion.databases.query({
-    database_id: PROFILES_DB,
-    filter: { property: 'clerk_id', rich_text: { equals: clerkId } },
-  })
-  const page = res.results[0]
-  return page ? pageToProfile(page as PageObjectResponse) : null
-}
+// Cached because the app layout reads this on every server render. Keyed by the
+// clerkId argument and tagged `profiles`, so app-driven admin/profile edits
+// invalidate it immediately; edits made directly in Notion lag ≤ the TTL.
+export const getProfileByClerkId = unstable_cache(
+  async (clerkId: string): Promise<Profile | null> => {
+    const res = await notion.databases.query({
+      database_id: PROFILES_DB,
+      filter: { property: 'clerk_id', rich_text: { equals: clerkId } },
+    })
+    const page = res.results[0]
+    return page ? pageToProfile(page as PageObjectResponse) : null
+  },
+  ['getProfileByClerkId'],
+  { tags: [CACHE_TAGS.profiles], revalidate: CACHE_TTL_SECONDS }
+)
 
 export async function getProfileById(id: string): Promise<Profile | null> {
   try {
@@ -191,7 +212,7 @@ export async function getProfileById(id: string): Promise<Profile | null> {
   }
 }
 
-export async function getAllProfiles(filters?: {
+async function getAllProfilesUncached(filters?: {
   q?: string
   year?: number
   major?: string
@@ -248,6 +269,12 @@ export async function getAllProfiles(filters?: {
   return pages.map(pageToProfile)
 }
 
+export const getAllProfiles = unstable_cache(
+  getAllProfilesUncached,
+  ['getAllProfiles'],
+  { tags: [CACHE_TAGS.profiles], revalidate: CACHE_TTL_SECONDS }
+)
+
 async function getProfilesBigRelationProperty(): Promise<string | null> {
   const database = await notion.databases.retrieve({ database_id: PROFILES_DB })
   const properties = (database as { properties?: Record<string, unknown> }).properties ?? {}
@@ -279,7 +306,7 @@ async function getProfilesFamilyTreeRelationProperty(): Promise<string | null> {
   return null
 }
 
-export async function getAllFamilyTrees(): Promise<FamilyTree[]> {
+async function getAllFamilyTreesUncached(): Promise<FamilyTree[]> {
   const pages: PageObjectResponse[] = []
   let cursor: string | undefined
 
@@ -298,6 +325,12 @@ export async function getAllFamilyTrees(): Promise<FamilyTree[]> {
   return pages.map(pageToFamilyTree)
 }
 
+export const getAllFamilyTrees = unstable_cache(
+  getAllFamilyTreesUncached,
+  ['getAllFamilyTrees'],
+  { tags: [CACHE_TAGS.familyTrees], revalidate: CACHE_TTL_SECONDS }
+)
+
 export async function getInternshipsByProfileId(profileId: string): Promise<WorkExperience[]> {
   const res = await notion.databases.query({
     database_id: INTERNSHIPS_DB,
@@ -306,7 +339,7 @@ export async function getInternshipsByProfileId(profileId: string): Promise<Work
   return res.results.map((p) => pageToWorkExperience(p as PageObjectResponse))
 }
 
-export async function getAllWorkExperiences(): Promise<WorkExperience[]> {
+async function getAllWorkExperiencesUncached(): Promise<WorkExperience[]> {
   const pages: PageObjectResponse[] = []
   let cursor: string | undefined
 
@@ -324,6 +357,12 @@ export async function getAllWorkExperiences(): Promise<WorkExperience[]> {
 
   return pages.map(pageToWorkExperience)
 }
+
+export const getAllWorkExperiences = unstable_cache(
+  getAllWorkExperiencesUncached,
+  ['getAllWorkExperiences'],
+  { tags: [CACHE_TAGS.workExperiences], revalidate: CACHE_TTL_SECONDS }
+)
 
 export async function getClubsByProfileId(profileId: string): Promise<Club[]> {
   const res = await notion.databases.query({
@@ -344,6 +383,7 @@ export async function createProfile(clerkId: string, fullName: string): Promise<
       is_admin: { checkbox: false },
     },
   })
+  revalidateTag(CACHE_TAGS.profiles, { expire: 0 })
 }
 
 export async function updateProfile(
@@ -441,6 +481,7 @@ export async function updateProfile(
   }
 
   await notion.pages.update({ page_id: profileId, properties })
+  revalidateTag(CACHE_TAGS.profiles, { expire: 0 })
 }
 
 export async function createFamilyTree(name: string): Promise<FamilyTree> {
@@ -451,6 +492,7 @@ export async function createFamilyTree(name: string): Promise<FamilyTree> {
     },
   })
 
+  revalidateTag(CACHE_TAGS.familyTrees, { expire: 0 })
   return pageToFamilyTree(page as PageObjectResponse)
 }
 
@@ -464,6 +506,7 @@ export async function updateFamilyTreeName(
       Name: { title: [{ text: { content: name } }] },
     },
   })
+  revalidateTag(CACHE_TAGS.familyTrees, { expire: 0 })
 }
 
 export async function assignFamilyTreeToProfiles(
@@ -488,6 +531,8 @@ export async function assignFamilyTreeToProfiles(
       })
     )
   )
+  revalidateTag(CACHE_TAGS.profiles, { expire: 0 })
+  revalidateTag(CACHE_TAGS.familyTrees, { expire: 0 })
 }
 
 export async function syncInternships(
@@ -536,6 +581,7 @@ export async function syncInternships(
         return notion.pages.create({ parent: { database_id: INTERNSHIPS_DB }, properties })
       })
   )
+  revalidateTag(CACHE_TAGS.workExperiences, { expire: 0 })
 }
 
 export async function syncClubs(
@@ -577,4 +623,6 @@ export async function deleteProfileAndRelated(profileId: string): Promise<void> 
     ...clubs.map((c) => notion.pages.update({ page_id: c.id, archived: true })),
   ])
   await notion.pages.update({ page_id: profileId, archived: true })
+  revalidateTag(CACHE_TAGS.profiles, { expire: 0 })
+  revalidateTag(CACHE_TAGS.workExperiences, { expire: 0 })
 }

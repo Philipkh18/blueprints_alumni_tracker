@@ -1,4 +1,5 @@
 import { Client } from "@notionhq/client";
+import { unstable_cache, revalidateTag } from "next/cache";
 import type { PageObjectResponse } from "@notionhq/client/build/src/api-endpoints";
 import type {
   Announcement,
@@ -19,126 +20,6 @@ const ORG_NEEDS_DB = process.env.NOTION_ORG_NEEDS_DB_ID!;
 // ─── Priority ordering ────────────────────────────────────────────────────────
 // Notion sorts selects alphabetically; we re-sort in TS using a weight map.
 const PRIORITY_WEIGHT: Record<string, number> = { high: 0, medium: 1, low: 2 };
-
-// ─── Demo data fallbacks ──────────────────────────────────────────────────────
-
-const DEMO_QUICK_LINKS: QuickLink[] = [
-  {
-    id: "demo-link-1",
-    label: "Final Project Presentation Slides",
-    url: "https://www.canva.com/design/DAHGlgQALXk/pB80XYB7EbJDxVjA40KHwg/edit",
-    category: "Resources",
-    icon: null,
-  },
-  {
-    id: "demo-link-2",
-    label: "Member Points",
-    url: "https://docs.google.com/spreadsheets/d/1p5KVpSpLlXjuqTNpZYKepLA2IcMUzPFEpobHvLzH71g/edit?usp=drive_web&ouid=105008881481143424628",
-    category: "Resources",
-    icon: null,
-  },
-  {
-    id: "demo-link-3",
-    label: "Org Constitution",
-    url: "https://drive.google.com/file/d/1tH1g-pnFU25znRDQwIFMiWYCBXVkTGUB/view?usp=sharing",
-    category: "Resources",
-    icon: null,
-  },
-];
-
-const DEMO_ANNOUNCEMENTS: Announcement[] = [
-  {
-    id: "demo-announcement-1",
-    title: "Day Of Service Today",
-    body: "Please report to BSB 1020 at 12:15 sharp for Day Of Service.",
-    author: "Aakash Gummidela [CEO]",
-    priority: "high",
-    tags: ["Event", "Reminder"],
-    type: "announcement",
-    created_at: "2026-04-17T15:00:00.000Z",
-    published: true,
-  },
-  {
-    id: "demo-announcement-2",
-    title: "Member Points",
-    body: "Please make sure you reach the requirement of 10 POINTS by the end of the semester. If there are any errors with your attendance, please reach out to me!.",
-    author: "Romel Patel [CFO]",
-    priority: "medium",
-    tags: ["Member", "Points"],
-    type: "update",
-    created_at: "2026-04-15T13:20:00.000Z",
-    published: true,
-  },
-  {
-    id: "demo-announcement-3",
-    title: "MDST Winners",
-    body: "2026 MDST Best Project (Blueprints) Winners...sensational.",
-    author: "Rohan Kolli",
-    priority: "low",
-    tags: ["Tech"],
-    type: "announcement",
-    created_at: "2026-04-12T10:45:00.000Z",
-    published: true,
-  },
-];
-
-const DEMO_IDEAS: Idea[] = [
-  {
-    id: "demo-idea-1",
-    title: "Alumni coffee chats by industry",
-    description:
-      "Match current members with alumni in consulting, product, and finance for short virtual chats each month.",
-    submitted_by: "Jordan Kim",
-    status: "under_review",
-    created_at: "2026-04-11T14:30:00.000Z",
-  },
-  {
-    id: "demo-idea-2",
-    title: "Resume review sprint before recruiting season",
-    description:
-      "Host a one-week feedback push where alumni volunteers claim resumes and leave comments asynchronously.",
-    submitted_by: "Avery Patel",
-    status: "open",
-    created_at: "2026-04-09T18:10:00.000Z",
-  },
-  {
-    id: "demo-idea-3",
-    title: "Member spotlight posts",
-    description:
-      "Share one short story each week about internships, projects, or campus wins to keep the community active.",
-    submitted_by: "Sam Rivera",
-    status: "open",
-    created_at: "2026-04-06T12:00:00.000Z",
-  },
-];
-
-const DEMO_ORG_NEEDS: OrgNeed[] = [
-  {
-    id: "demo-need-1",
-    title: "Final Project Presentations",
-    description: "Please submit the final project presentation slides.",
-    team: "E-Board",
-    urgency: "high",
-    point_person: "Aakash Gummidela",
-  },
-  {
-    id: "demo-need-2",
-    title: "Photographer for Headshots",
-    description: "Looking for someone to be a photographer for headshots.",
-    team: "Development",
-    urgency: "medium",
-    point_person: "Belinda Chang",
-  },
-  {
-    id: "demo-need-3",
-    title: "Day Of Service Volunteers",
-    description:
-      "Need members to repost Day Of Service on their social media platforms.",
-    team: "Development",
-    urgency: "low",
-    point_person: "Mia Zhong",
-  },
-];
 
 // ─── Property helpers ─────────────────────────────────────────────────────────
 
@@ -243,27 +124,22 @@ function pageToOrgNeed(page: PageObjectResponse): OrgNeed {
 
 // ─── Queries ──────────────────────────────────────────────────────────────────
 
-export async function getAnnouncements(): Promise<Announcement[]> {
-  if (!ANNOUNCEMENTS_DB) return DEMO_ANNOUNCEMENTS;
+export const getAnnouncements = unstable_cache(
+  async (): Promise<Announcement[]> => {
+    if (!ANNOUNCEMENTS_DB) return [];
 
-  try {
     const res = await notion.databases.query({
       database_id: ANNOUNCEMENTS_DB,
       filter: { property: "published", checkbox: { equals: true } },
       sorts: [{ timestamp: "created_time", direction: "descending" }],
     });
-    const items = res.results.map((p) =>
-      pageToAnnouncement(p as PageObjectResponse),
-    );
-    return items.length > 0
-      ? items.sort(
-          (a, b) => PRIORITY_WEIGHT[a.priority] - PRIORITY_WEIGHT[b.priority],
-        )
-      : DEMO_ANNOUNCEMENTS;
-  } catch {
-    return DEMO_ANNOUNCEMENTS;
-  }
-}
+    return res.results
+      .map((p) => pageToAnnouncement(p as PageObjectResponse))
+      .sort((a, b) => PRIORITY_WEIGHT[a.priority] - PRIORITY_WEIGHT[b.priority]);
+  },
+  ["getAnnouncements"],
+  { tags: ["announcements"], revalidate: 60 },
+);
 
 export async function getUpcomingEvents(limit = 6): Promise<HomeEvent[]> {
   const today = new Date().toISOString().split("T")[0];
@@ -276,25 +152,24 @@ export async function getUpcomingEvents(limit = 6): Promise<HomeEvent[]> {
   return res.results.map((p) => pageToEvent(p as PageObjectResponse));
 }
 
-export async function getQuickLinks(): Promise<QuickLink[]> {
-  if (!QUICK_LINKS_DB) return DEMO_QUICK_LINKS;
+export const getQuickLinks = unstable_cache(
+  async (): Promise<QuickLink[]> => {
+    if (!QUICK_LINKS_DB) return [];
 
-  try {
     const res = await notion.databases.query({
       database_id: QUICK_LINKS_DB,
       sorts: [{ property: "category", direction: "ascending" }],
     });
-    const links = res.results.map((p) => pageToQuickLink(p as PageObjectResponse));
-    return links.length > 0 ? links : DEMO_QUICK_LINKS;
-  } catch {
-    return DEMO_QUICK_LINKS;
-  }
-}
+    return res.results.map((p) => pageToQuickLink(p as PageObjectResponse));
+  },
+  ["getQuickLinks"],
+  { tags: ["quick-links"], revalidate: 60 },
+);
 
-export async function getActiveIdeas(): Promise<Idea[]> {
-  if (!IDEAS_DB) return DEMO_IDEAS;
+export const getActiveIdeas = unstable_cache(
+  async (): Promise<Idea[]> => {
+    if (!IDEAS_DB) return [];
 
-  try {
     const res = await notion.databases.query({
       database_id: IDEAS_DB,
       filter: {
@@ -305,32 +180,27 @@ export async function getActiveIdeas(): Promise<Idea[]> {
       },
       sorts: [{ timestamp: "created_time", direction: "descending" }],
     });
-    const ideas = res.results.map((p) => pageToIdea(p as PageObjectResponse));
-    return ideas.length > 0 ? ideas : DEMO_IDEAS;
-  } catch {
-    return DEMO_IDEAS;
-  }
-}
+    return res.results.map((p) => pageToIdea(p as PageObjectResponse));
+  },
+  ["getActiveIdeas"],
+  { tags: ["ideas"], revalidate: 60 },
+);
 
-export async function getOrgNeeds(): Promise<OrgNeed[]> {
-  if (!ORG_NEEDS_DB) return DEMO_ORG_NEEDS;
+export const getOrgNeeds = unstable_cache(
+  async (): Promise<OrgNeed[]> => {
+    if (!ORG_NEEDS_DB) return [];
 
-  try {
     const res = await notion.databases.query({
       database_id: ORG_NEEDS_DB,
       sorts: [{ timestamp: "created_time", direction: "descending" }],
     });
-    const items = res.results.map((p) =>
-      pageToOrgNeed(p as PageObjectResponse),
-    );
-    const needs = items.sort(
-      (a, b) => PRIORITY_WEIGHT[a.urgency] - PRIORITY_WEIGHT[b.urgency],
-    );
-    return needs.length > 0 ? needs : DEMO_ORG_NEEDS;
-  } catch {
-    return DEMO_ORG_NEEDS;
-  }
-}
+    return res.results
+      .map((p) => pageToOrgNeed(p as PageObjectResponse))
+      .sort((a, b) => PRIORITY_WEIGHT[a.urgency] - PRIORITY_WEIGHT[b.urgency]);
+  },
+  ["getOrgNeeds"],
+  { tags: ["org-needs"], revalidate: 60 },
+);
 
 export async function createIdea(data: {
   title: string;
@@ -346,4 +216,5 @@ export async function createIdea(data: {
       status: { select: { name: "open" } },
     },
   });
+  revalidateTag("ideas", { expire: 0 });
 }

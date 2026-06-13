@@ -12,9 +12,31 @@ import {
 } from "@/components/home/HomeSkeleton";
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button-variants";
-import { Globe, Lightbulb, Network } from "lucide-react";
+import {
+  ExternalLink,
+  Globe,
+  Lightbulb,
+  Network,
+  TrendingUp,
+  Eye,
+} from "lucide-react";
 
 export const metadata = { title: "Home — Blueprints for Pangaea" };
+
+const PLATFORM_APPS = [
+  {
+    label: "Supply Request",
+    description: "Quantitative research and market analysis tools.",
+    href: "https://b4p-quantitative.vercel.app/",
+    icon: TrendingUp,
+  },
+  {
+    label: "External Dashboard",
+    description: "Public-facing club presence and external outreach.",
+    href: "https://b4p-external-view-w26.vercel.app/",
+    icon: Eye,
+  },
+];
 
 const HERO_PILLARS = [
   {
@@ -71,6 +93,40 @@ export default function HomePage() {
               >
                 Update Your Profile
               </Link>
+            </div>
+
+            <div className="space-y-3">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.07em] text-muted-foreground">
+                Platform
+              </p>
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                {PLATFORM_APPS.map((app) => {
+                  const Icon = app.icon;
+                  return (
+                    <a
+                      key={app.href}
+                      href={app.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="group relative overflow-hidden rounded-2xl bg-[linear-gradient(135deg,var(--color-brand-ocean),var(--color-brand-bright))] p-5 text-white shadow-[0_8px_24px_oklch(0.54_0.12_252/0.30)] transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_14px_32px_oklch(0.54_0.12_252/0.42)]"
+                    >
+                      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,oklch(1_0_0/0.08),transparent_60%)]" />
+                      <ExternalLink className="absolute right-4 top-4 size-3.5 opacity-50 transition-all duration-200 group-hover:opacity-100 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                      <div className="relative">
+                        <div className="mb-3 flex size-9 items-center justify-center rounded-xl bg-white/20">
+                          <Icon className="size-4" />
+                        </div>
+                        <p className="text-[15px] font-semibold tracking-[-0.01em]">
+                          {app.label}
+                        </p>
+                        <p className="mt-1 text-[13px] leading-relaxed text-white/70">
+                          {app.description}
+                        </p>
+                      </div>
+                    </a>
+                  );
+                })}
+              </div>
             </div>
 
             <div className="grid gap-3 sm:grid-cols-3">

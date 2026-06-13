@@ -1,4 +1,5 @@
 import { Client } from '@notionhq/client'
+import { unstable_cache } from 'next/cache'
 import type { PageObjectResponse } from '@notionhq/client/build/src/api-endpoints'
 import type { TeamUpdate, TeamUpdateStatus } from './types'
 
@@ -52,18 +53,21 @@ function pageToTeamUpdate(page: PageObjectResponse): TeamUpdate {
 
 // ─── Queries ──────────────────────────────────────────────────────────────────
 
-export async function getTeamUpdates(): Promise<TeamUpdate[]> {
-  if (!TEAM_UPDATES_DB) return []
+export const getTeamUpdates = unstable_cache(
+  async (): Promise<TeamUpdate[]> => {
+    if (!TEAM_UPDATES_DB) return []
 
-  try {
-    const res = await notion.databases.query({
-      database_id: TEAM_UPDATES_DB,
-      filter: { property: 'published', checkbox: { equals: true } },
-      sorts: [{ property: 'date', direction: 'descending' }],
-    })
-    const updates = res.results.map((p) => pageToTeamUpdate(p as PageObjectResponse))
-    return updates
-  } catch {
-    return []
-  }
-}
+    try {
+      const res = await notion.databases.query({
+        database_id: TEAM_UPDATES_DB,
+        filter: { property: 'published', checkbox: { equals: true } },
+        sorts: [{ property: 'date', direction: 'descending' }],
+      })
+      return res.results.map((p) => pageToTeamUpdate(p as PageObjectResponse))
+    } catch {
+      return []
+    }
+  },
+  ['getTeamUpdates'],
+  { tags: ['team-updates'], revalidate: 60 }
+)

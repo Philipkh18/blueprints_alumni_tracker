@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
+import { revalidateTag } from 'next/cache'
 import { auth } from '@clerk/nextjs/server'
-import { getProfileByClerkId, getProfileById, notion, pageToProfile } from '@/lib/notion'
+import { getProfileByClerkId, getProfileById, notion, pageToProfile, CACHE_TAGS } from '@/lib/notion'
 import type { PageObjectResponse } from '@notionhq/client/build/src/api-endpoints'
 
 const NOTION_API_BASE = 'https://api.notion.com/v1'
@@ -125,6 +126,7 @@ export async function POST(
 
     const updated = await notion.pages.retrieve({ page_id: id })
     const nextProfile = pageToProfile(updated as PageObjectResponse)
+    revalidateTag(CACHE_TAGS.profiles, { expire: 0 })
     return NextResponse.json({
       success: true,
       profile: {

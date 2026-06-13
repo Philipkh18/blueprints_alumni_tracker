@@ -24,6 +24,10 @@ export default function MemberCard({ profile }: { profile: Profile }) {
           <img
             src={profile.avatar_url}
             alt={profile.full_name}
+            width={64}
+            height={64}
+            loading="lazy"
+            decoding="async"
             className="size-16 rounded-full object-cover ring-2 ring-white shadow-[0_4px_12px_oklch(0.22_0.07_257/0.12)]"
           />
         ) : (

@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
+import { revalidateTag } from 'next/cache'
 import { auth } from '@clerk/nextjs/server'
-import { notion, getProfileByClerkId, deleteProfileAndRelated } from '@/lib/notion'
+import { notion, getProfileByClerkId, deleteProfileAndRelated, CACHE_TAGS } from '@/lib/notion'
 
 async function requireAdmin(userId: string) {
   const viewer = await getProfileByClerkId(userId)
@@ -24,6 +25,7 @@ export async function PATCH(
     properties: { is_admin: { checkbox: is_admin } },
   })
 
+  revalidateTag(CACHE_TAGS.profiles, { expire: 0 })
   return NextResponse.json({ success: true })
 }
 

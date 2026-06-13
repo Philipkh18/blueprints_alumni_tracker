@@ -130,6 +130,9 @@ export default function ProfileMediaEditor({
                 <img
                   src={avatarUrl}
                   alt={fullName}
+                  width={96}
+                  height={96}
+                  decoding="async"
                   className="size-24 rounded-full border-4 border-white object-cover shadow-[0_8px_24px_oklch(0.22_0.07_257/0.15)]"
                 />
               ) : (
@@ -209,6 +212,9 @@ export default function ProfileMediaEditor({
             <img
               src={avatarUrl}
               alt={fullName}
+              width={80}
+              height={80}
+              decoding="async"
               className="size-20 rounded-full border border-border object-cover"
             />
           ) : (
