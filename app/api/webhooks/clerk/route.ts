@@ -4,9 +4,10 @@ import { WebhookEvent } from '@clerk/nextjs/server'
 import { createProfile } from '@/lib/notion'
 
 export async function POST(req: Request) {
-  const WEBHOOK_SECRET = process.env.CLERK_WEBHOOK_SECRET
+  const WEBHOOK_SECRET =
+    process.env.CLERK_WEBHOOK_SIGNING_SECRET ?? process.env.CLERK_WEBHOOK_SECRET
   if (!WEBHOOK_SECRET) {
-    return new Response('Missing CLERK_WEBHOOK_SECRET', { status: 500 })
+    return new Response('Missing Clerk webhook signing secret', { status: 500 })
   }
 
   const headerPayload = await headers()
