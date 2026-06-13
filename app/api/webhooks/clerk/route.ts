@@ -30,21 +30,26 @@ export async function POST(req: Request) {
       'svix-timestamp': svix_timestamp,
       'svix-signature': svix_signature,
     }) as WebhookEvent
-  } catch {
+  } catch (error) {
+    console.error('[POST /api/webhooks/clerk] Webhook signature verification failed.', { svix_id, error })
     return new Response('Invalid signature', { status: 400 })
   }
 
   if (evt.type === 'user.created') {
     const { id, email_addresses, first_name, last_name } = evt.data
+    const email = email_addresses?.[0]?.email_address ?? null
     const full_name =
       [first_name, last_name].filter(Boolean).join(' ') ||
-      email_addresses?.[0]?.email_address?.split('@')[0] ||
+      email?.split('@')[0] ||
       'New Member'
+
+    console.log('[POST /api/webhooks/clerk] user.created — creating Notion profile.', { clerkId: id, full_name, email })
 
     try {
       await createProfile(id, full_name)
+      console.log('[POST /api/webhooks/clerk] Notion profile created.', { clerkId: id })
     } catch (err) {
-      console.error('Error creating Notion profile:', err)
+      console.error('[POST /api/webhooks/clerk] Failed to create Notion profile.', { clerkId: id, full_name, error: err })
       return new Response('Error creating profile', { status: 500 })
     }
   }

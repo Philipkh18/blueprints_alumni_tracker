@@ -68,7 +68,7 @@ export default function HomePage() {
               variant="outline"
               className="brand-chip w-fit rounded-full px-4 py-1.5 text-[11px] font-medium tracking-[0.02em] text-foreground"
             >
-              Blueprints Alumni Hub
+              Blueprints Hub
             </Badge>
 
             <div className="space-y-4">

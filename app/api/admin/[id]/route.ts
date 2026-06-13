@@ -20,12 +20,17 @@ export async function PATCH(
   const { id } = await params
   const { is_admin } = await req.json()
 
-  await notion.pages.update({
-    page_id: id,
-    properties: { is_admin: { checkbox: is_admin } },
-  })
+  try {
+    await notion.pages.update({
+      page_id: id,
+      properties: { is_admin: { checkbox: is_admin } },
+    })
+    revalidateTag(CACHE_TAGS.profiles, { expire: 0 })
+  } catch (error) {
+    console.error('[PATCH /api/admin/:id] Failed to toggle is_admin.', { id, is_admin, error })
+    return NextResponse.json({ error: 'Failed to update admin status.' }, { status: 500 })
+  }
 
-  revalidateTag(CACHE_TAGS.profiles, { expire: 0 })
   return NextResponse.json({ success: true })
 }
 
@@ -39,7 +44,13 @@ export async function DELETE(
   if (!(await requireAdmin(userId))) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 
   const { id } = await params
-  await deleteProfileAndRelated(id)
+
+  try {
+    await deleteProfileAndRelated(id)
+  } catch (error) {
+    console.error('[DELETE /api/admin/:id] Failed to delete profile.', { id, error })
+    return NextResponse.json({ error: 'Failed to delete profile.' }, { status: 500 })
+  }
 
   return NextResponse.json({ success: true })
 }

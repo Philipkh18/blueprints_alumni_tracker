@@ -4,7 +4,7 @@ import './globals.css'
 
 export const metadata: Metadata = {
   title: {
-    default: 'Blueprints for Pangaea Alumni Hub',
+    default: 'Blueprints Hub',
     template: '%s | Blueprints for Pangaea',
   },
   description: 'Directory, updates, and opportunities for the Blueprints for Pangaea alumni network.',

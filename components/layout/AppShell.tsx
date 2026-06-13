@@ -158,7 +158,7 @@ export default function AppShell({
               </div>
               <div className="mt-4 space-y-1">
                 <p className="text-[11px] font-medium tracking-[0.02em] text-foreground">
-                  Alumni Hub
+                  Blueprints Hub
                 </p>
                 <p className="text-xs leading-relaxed text-muted-foreground/90">
                   Members, opportunities, updates, and org needs.
