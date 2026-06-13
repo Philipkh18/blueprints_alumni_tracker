@@ -1,11 +1,11 @@
-'use client'
+"use client";
 
-import { useState, useEffect } from 'react'
-import Link from 'next/link'
-import Image from 'next/image'
-import { usePathname } from 'next/navigation'
-import { UserButton } from '@clerk/nextjs'
-import { cn } from '@/lib/utils'
+import { useState, useEffect } from "react";
+import Link from "next/link";
+import Image from "next/image";
+import { usePathname } from "next/navigation";
+import { UserButton } from "@clerk/nextjs";
+import { cn } from "@/lib/utils";
 import {
   Home,
   Users,
@@ -23,96 +23,107 @@ import {
   TrendingUp,
   Eye,
   ExternalLink,
-} from 'lucide-react'
+} from "lucide-react";
 
 const EXTERNAL_APPS = [
-  { href: 'https://b4p-quantitative.vercel.app/', label: 'Quant Hub', icon: TrendingUp },
-  { href: 'https://b4p-external-view-w26.vercel.app/', label: 'External View', icon: Eye },
-]
+  {
+    href: "https://b4p-quantitative.vercel.app/",
+    label: "Supply Request System",
+    icon: TrendingUp,
+  },
+  {
+    href: "https://b4p-external-view-w26.vercel.app/",
+    label: "External Dashboard",
+    icon: Eye,
+  },
+];
 
 const NAV_ITEMS = [
-  { href: '/home', label: 'Home', icon: Home },
-  { href: '/dashboard', label: 'Members', icon: Users },
-  { href: '/events', label: 'Events', icon: Calendar },
-  { href: '/careers', label: 'Careers', icon: Briefcase },
-  { href: '/teams', label: 'Teams', icon: FolderKanban },
-  { href: '/connections', label: 'Connections', icon: Network },
-]
+  { href: "/home", label: "Home", icon: Home },
+  { href: "/dashboard", label: "Members", icon: Users },
+  { href: "/events", label: "Events", icon: Calendar },
+  { href: "/careers", label: "Careers", icon: Briefcase },
+  { href: "/teams", label: "Teams", icon: FolderKanban },
+  { href: "/connections", label: "Connections", icon: Network },
+];
 
 const ROUTE_META = [
   {
-    href: '/home',
-    title: 'Network Home',
-    subtitle: 'Updates, events, and asks across the Blueprints community.',
+    href: "/home",
+    title: "Network Home",
+    subtitle: "Updates, events, and asks across the Blueprints community.",
   },
   {
-    href: '/dashboard',
-    title: 'Member Directory',
-    subtitle: 'Search alumni, majors, roles, and shared context quickly.',
+    href: "/dashboard",
+    title: "Member Directory",
+    subtitle: "Search alumni, majors, roles, and shared context quickly.",
   },
   {
-    href: '/events',
-    title: 'Events',
-    subtitle: 'Track the moments bringing the network together.',
+    href: "/events",
+    title: "Events",
+    subtitle: "Track the moments bringing the network together.",
   },
   {
-    href: '/careers',
-    title: 'Careers',
-    subtitle: 'Keep opportunities visible to the community.',
+    href: "/careers",
+    title: "Careers",
+    subtitle: "Keep opportunities visible to the community.",
   },
   {
-    href: '/teams',
-    title: 'Teams',
-    subtitle: 'Follow who is doing what across Blueprints.',
+    href: "/teams",
+    title: "Teams",
+    subtitle: "Follow who is doing what across Blueprints.",
   },
   {
-    href: '/connections',
-    title: 'Connections',
-    subtitle: 'Map the relationships that keep the alumni network warm.',
+    href: "/connections",
+    title: "Connections",
+    subtitle: "Map the relationships that keep the alumni network warm.",
   },
   {
-    href: '/admin',
-    title: 'Admin',
-    subtitle: 'Manage the data that powers the alumni atlas.',
+    href: "/admin",
+    title: "Admin",
+    subtitle: "Manage the data that powers the alumni atlas.",
   },
-]
+];
 
 export default function AppShell({
   children,
   isAdmin,
   profileHref,
 }: {
-  children: React.ReactNode
-  isAdmin: boolean
-  profileHref: string
+  children: React.ReactNode;
+  isAdmin: boolean;
+  profileHref: string;
 }) {
-  const [collapsed, setCollapsed] = useState(false)
-  const [mobileOpen, setMobileOpen] = useState(false)
-  const pathname = usePathname()
-  const routeMeta =
-    ROUTE_META.find((item) => pathname === item.href || pathname.startsWith(item.href + '/')) ?? {
-      title: 'Blueprints for Pangaea',
-      subtitle: 'A shared home for alumni profiles, opportunities, and updates.',
-    }
+  const [collapsed, setCollapsed] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const pathname = usePathname();
+  const routeMeta = ROUTE_META.find(
+    (item) => pathname === item.href || pathname.startsWith(item.href + "/"),
+  ) ?? {
+    title: "Blueprints for Pangaea",
+    subtitle: "A shared home for alumni profiles, opportunities, and updates.",
+  };
 
   // Close mobile nav on route change
   useEffect(() => {
-    setMobileOpen(false)
-  }, [pathname])
+    setMobileOpen(false);
+  }, [pathname]);
 
   // Lock body scroll when mobile nav is open
   useEffect(() => {
-    document.body.style.overflow = mobileOpen ? 'hidden' : ''
-    return () => { document.body.style.overflow = '' }
-  }, [mobileOpen])
+    document.body.style.overflow = mobileOpen ? "hidden" : "";
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [mobileOpen]);
 
   return (
     <div className="flex h-dvh bg-transparent">
       {/* ── Mobile Backdrop ──────────────────────────────────────────────── */}
       <div
         className={cn(
-          'fixed inset-0 z-40 bg-foreground/20 backdrop-blur-sm transition-opacity duration-300 lg:hidden',
-          mobileOpen ? 'opacity-100' : 'pointer-events-none opacity-0'
+          "fixed inset-0 z-40 bg-foreground/20 backdrop-blur-sm transition-opacity duration-300 lg:hidden",
+          mobileOpen ? "opacity-100" : "pointer-events-none opacity-0",
         )}
         onClick={() => setMobileOpen(false)}
       />
@@ -120,18 +131,22 @@ export default function AppShell({
       {/* ── Sidebar ──────────────────────────────────────────────────────── */}
       <aside
         className={cn(
-          'glass fixed inset-y-0 left-0 z-50 flex flex-col overflow-hidden border-r border-sidebar-border transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] lg:relative lg:z-auto',
+          "glass fixed inset-y-0 left-0 z-50 flex flex-col overflow-hidden border-r border-sidebar-border transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] lg:relative lg:z-auto",
           // Desktop width
-          collapsed ? 'lg:w-[72px]' : 'lg:w-64',
+          collapsed ? "lg:w-[72px]" : "lg:w-64",
           // Mobile: translate off-screen
-          mobileOpen ? 'w-64 translate-x-0 shadow-2xl' : '-translate-x-full lg:translate-x-0'
+          mobileOpen
+            ? "w-64 translate-x-0 shadow-2xl"
+            : "-translate-x-full lg:translate-x-0",
         )}
       >
         {/* Logo */}
         <div
           className={cn(
-            'relative z-10 shrink-0 border-b border-sidebar-border transition-all',
-            collapsed ? 'flex h-16 items-center justify-center px-3' : 'px-5 py-5'
+            "relative z-10 shrink-0 border-b border-sidebar-border transition-all",
+            collapsed
+              ? "flex h-16 items-center justify-center px-3"
+              : "px-5 py-5",
           )}
         >
           {collapsed ? (
@@ -172,46 +187,54 @@ export default function AppShell({
         <nav className="relative z-10 flex-1 overflow-y-auto px-2 py-3 space-y-0.5">
           <p
             className={cn(
-              'mb-2 px-4 text-[11px] font-medium text-muted-foreground transition-opacity',
-              collapsed && 'lg:opacity-0'
+              "mb-2 px-4 text-[11px] font-medium text-muted-foreground transition-opacity",
+              collapsed && "lg:opacity-0",
             )}
           >
             Menu
           </p>
           {NAV_ITEMS.map((item) => {
-            const active = pathname === item.href || pathname.startsWith(item.href + '/')
-            const Icon = item.icon
+            const active =
+              pathname === item.href || pathname.startsWith(item.href + "/");
+            const Icon = item.icon;
             return (
               <Link
                 key={item.href}
                 href={item.href}
                 className={cn(
-                  'group relative flex h-11 items-center gap-3 rounded-2xl px-4 text-[15px] font-medium transition-all duration-150',
+                  "group relative flex h-11 items-center gap-3 rounded-2xl px-4 text-[15px] font-medium transition-all duration-150",
                   active
-                    ? 'bg-primary/10 text-foreground shadow-[inset_0_0_0_1px_oklch(0.58_0.06_255/0.14)]'
-                    : 'text-muted-foreground hover:bg-secondary hover:text-foreground',
-                  collapsed && 'lg:justify-center lg:px-0'
+                    ? "bg-primary/10 text-foreground shadow-[inset_0_0_0_1px_oklch(0.58_0.06_255/0.14)]"
+                    : "text-muted-foreground hover:bg-secondary hover:text-foreground",
+                  collapsed && "lg:justify-center lg:px-0",
                 )}
               >
                 <Icon className="size-4 shrink-0" />
-                <span className={cn('transition-opacity', collapsed && 'lg:hidden')}>
+                <span
+                  className={cn("transition-opacity", collapsed && "lg:hidden")}
+                >
                   {item.label}
                 </span>
               </Link>
-            )
+            );
           })}
 
-          <div className={cn('my-3 border-t border-sidebar-border', collapsed ? 'mx-3' : 'mx-2')} />
+          <div
+            className={cn(
+              "my-3 border-t border-sidebar-border",
+              collapsed ? "mx-3" : "mx-2",
+            )}
+          />
           <p
             className={cn(
-              'mb-2 px-4 text-[11px] font-medium text-muted-foreground transition-opacity',
-              collapsed && 'lg:opacity-0'
+              "mb-2 px-4 text-[11px] font-medium text-muted-foreground transition-opacity",
+              collapsed && "lg:opacity-0",
             )}
           >
             Apps
           </p>
           {EXTERNAL_APPS.map((app) => {
-            const Icon = app.icon
+            const Icon = app.icon;
             return (
               <a
                 key={app.href}
@@ -219,32 +242,39 @@ export default function AppShell({
                 target="_blank"
                 rel="noopener noreferrer"
                 className={cn(
-                  'group relative flex h-11 items-center gap-3 rounded-2xl px-4 text-[15px] font-medium transition-all duration-150',
-                  'bg-[linear-gradient(135deg,oklch(0.54_0.12_252/0.08),oklch(0.64_0.16_252/0.06))] text-[oklch(0.44_0.10_252)] hover:bg-[linear-gradient(135deg,oklch(0.54_0.12_252/0.14),oklch(0.64_0.16_252/0.10))] hover:text-[oklch(0.34_0.10_252)]',
-                  collapsed && 'lg:justify-center lg:px-0'
+                  "group relative flex h-11 items-center gap-3 rounded-2xl px-4 text-[15px] font-medium transition-all duration-150",
+                  "bg-[linear-gradient(135deg,oklch(0.54_0.12_252/0.08),oklch(0.64_0.16_252/0.06))] text-[oklch(0.44_0.10_252)] hover:bg-[linear-gradient(135deg,oklch(0.54_0.12_252/0.14),oklch(0.64_0.16_252/0.10))] hover:text-[oklch(0.34_0.10_252)]",
+                  collapsed && "lg:justify-center lg:px-0",
                 )}
               >
                 <Icon className="size-4 shrink-0" />
-                <span className={cn('transition-opacity', collapsed && 'lg:hidden')}>
+                <span
+                  className={cn("transition-opacity", collapsed && "lg:hidden")}
+                >
                   {app.label}
                 </span>
-                <ExternalLink className={cn('ml-auto size-3 opacity-50 transition-opacity group-hover:opacity-100', collapsed && 'lg:hidden')} />
+                <ExternalLink
+                  className={cn(
+                    "ml-auto size-3 opacity-50 transition-opacity group-hover:opacity-100",
+                    collapsed && "lg:hidden",
+                  )}
+                />
               </a>
-            )
+            );
           })}
 
           {isAdmin && (
             <>
               <div
                 className={cn(
-                  'my-3 border-t border-sidebar-border',
-                  collapsed ? 'mx-3' : 'mx-2'
+                  "my-3 border-t border-sidebar-border",
+                  collapsed ? "mx-3" : "mx-2",
                 )}
               />
               <p
                 className={cn(
-                  'mb-2 px-4 text-[11px] font-medium text-muted-foreground transition-opacity',
-                  collapsed && 'lg:opacity-0'
+                  "mb-2 px-4 text-[11px] font-medium text-muted-foreground transition-opacity",
+                  collapsed && "lg:opacity-0",
                 )}
               >
                 Admin
@@ -252,15 +282,17 @@ export default function AppShell({
               <Link
                 href="/admin"
                 className={cn(
-                  'group flex h-11 items-center gap-3 rounded-2xl px-4 text-[15px] font-medium transition-all duration-150',
-                  pathname === '/admin'
-                    ? 'bg-primary/10 text-foreground shadow-[inset_0_0_0_1px_oklch(0.58_0.06_255/0.14)]'
-                    : 'text-muted-foreground hover:bg-secondary hover:text-foreground',
-                  collapsed && 'lg:justify-center lg:px-0'
+                  "group flex h-11 items-center gap-3 rounded-2xl px-4 text-[15px] font-medium transition-all duration-150",
+                  pathname === "/admin"
+                    ? "bg-primary/10 text-foreground shadow-[inset_0_0_0_1px_oklch(0.58_0.06_255/0.14)]"
+                    : "text-muted-foreground hover:bg-secondary hover:text-foreground",
+                  collapsed && "lg:justify-center lg:px-0",
                 )}
               >
                 <Shield className="size-4 shrink-0" />
-                <span className={cn('transition-opacity', collapsed && 'lg:hidden')}>
+                <span
+                  className={cn("transition-opacity", collapsed && "lg:hidden")}
+                >
                   Admin
                 </span>
               </Link>
@@ -273,8 +305,8 @@ export default function AppShell({
           <button
             onClick={() => setCollapsed(!collapsed)}
             className={cn(
-              'flex h-10 w-full items-center gap-2 rounded-2xl px-4 text-sm text-muted-foreground transition-all duration-150 hover:bg-secondary hover:text-foreground',
-              collapsed && 'justify-center px-0'
+              "flex h-10 w-full items-center gap-2 rounded-2xl px-4 text-sm text-muted-foreground transition-all duration-150 hover:bg-secondary hover:text-foreground",
+              collapsed && "justify-center px-0",
             )}
           >
             {collapsed ? (
@@ -321,7 +353,7 @@ export default function AppShell({
             <UserButton
               appearance={{
                 elements: {
-                  avatarBox: 'size-8 ring-2 ring-background shadow-sm',
+                  avatarBox: "size-8 ring-2 ring-background shadow-sm",
                 },
               }}
             >
@@ -345,5 +377,5 @@ export default function AppShell({
         </main>
       </div>
     </div>
-  )
+  );
 }
